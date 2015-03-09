@@ -1,0 +1,7 @@
+{
+    "bucket": "aws-frontend-store",
+    "env": "FABIO",
+    "configKey": "frontsapi/config/config.json",
+    "collectionsPrefix": "frontsapi/collection",
+    "maxParallelRequests": 6
+}
