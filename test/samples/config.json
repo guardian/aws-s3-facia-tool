@@ -1,0 +1,89 @@
+{
+	"fronts": {
+		"uk": {
+			"collections": [
+				"9e0d5e94-3f24-4f0f-bdd5-bdd07aff6838",
+				"b4051e8c-9d75-4ef9-b3da-18f11a20b41c",
+				"b951b658-5b69-4890-91fd-5b50b500f61c",
+				"3b6c3b04-0f6e-4679-80f6-97967de8eb61"
+			]
+		},
+		"two": {
+			"collections": [
+				"83b9699d-a46e-4bfd-91f6-8496ac21b000",
+				"uk/commentisfree/most-viewed/regular-stories",
+				"2911fe63-f7b9-4551-b60a-66ee5f6d3a51"
+			],
+			"priority": "commercial"
+		},
+		"three": {
+			"collections": [
+				"367c4980-4ea3-489f-9a6a-fdcbfb609880",
+				"167972f9-f867-4ab1-b0c3-110256434252",
+				"6a7d69f7-888b-428d-9cc4-01b7ba6669a6"
+			],
+			"title": "Something",
+			"description": "Fun"
+		},
+		"another": {
+			"collections": [
+				"367c4980-4ea3-489f-9a6a-fdcbfb609880"
+			],
+			"onPageDescription": "Long text",
+			"isHidden": true
+		}
+	},
+	"collections": {
+		"2911fe63-f7b9-4551-b60a-66ee5f6d3a51": {
+			"displayName": "the big picture",
+			"apiQuery": "world/series/eyewitness",
+			"type": "fixed/small/slow-I"
+		},
+		"uk/commentisfree/most-viewed/regular-stories": {
+			"displayName": "popular in opinion",
+			"apiQuery": "uk/commentisfree?show-most-viewed=true&show-editors-picks=false&hide-recent-content=true",
+			"type": "news/most-popular",
+			"uneditable": true
+		},
+		"3b6c3b04-0f6e-4679-80f6-97967de8eb61": {
+			"displayName": "Xero partner zone ",
+			"apiQuery": "search?tag=small-business-network-xero-partner-zone/small-business-network-xero-partner-zone",
+			"type": "fixed/medium/slow-VI"
+		},
+		"b951b658-5b69-4890-91fd-5b50b500f61c": {
+			"displayName": "finance hub",
+			"apiQuery": "search?tag=sustainable-business/series/finance&use-date=published",
+			"type": "fixed/medium/slow-VII"
+		},
+		"6a7d69f7-888b-428d-9cc4-01b7ba6669a6": {
+			"displayName": "documents",
+			"type": "fixed/small/fast-VIII"
+		},
+		"167972f9-f867-4ab1-b0c3-110256434252": {
+			"displayName": "External links",
+			"type": "nav/list"
+		},
+		"83b9699d-a46e-4bfd-91f6-8496ac21b000": {
+			"displayName": "External links",
+			"type": "nav/list"
+		},
+		"b4051e8c-9d75-4ef9-b3da-18f11a20b41c": {
+			"displayName": "Cities at Dawn",
+			"type": "fixed/medium/slow-VI"
+		},
+		"9e0d5e94-3f24-4f0f-bdd5-bdd07aff6838": {
+			"displayName": "playlists",
+			"type": "dynamic/fast",
+			"groups": [
+				"standard",
+				"big",
+				"very big",
+				"huge"
+			]
+		},
+		"367c4980-4ea3-489f-9a6a-fdcbfb609880": {
+			"displayName": "useful links",
+			"type": "nav/list"
+		}
+	}
+}
