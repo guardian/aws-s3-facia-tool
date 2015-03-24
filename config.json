@@ -3,6 +3,7 @@
     "env": "CODE",
     "configKey": "frontsapi/config/config.json",
     "configHistoryPrefix": "frontsapi/history/config",
+    "collectionHistoryPrefix": "frontsapi/history/collection",
     "collectionsPrefix": "frontsapi/collection",
     "maxParallelRequests": 6
 }

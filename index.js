@@ -13,7 +13,7 @@ Promise.all([
     tool.fetchConfig(),
     tool.listCollections(),
     tool.front({
-        front: 'au',
+        front: 'fabio-banana',
         since: moment().subtract(24, 'hours')
     })
 ])
@@ -68,7 +68,11 @@ Promise.all([
     return tool.findCollections(front.allCollectionsEver());
 })
 .then(function (list) {
-    console.log(list);
+    // console.log(list);
+    return tool.historyCollection(list[0].id, moment().subtract(24, 'hours'));
+})
+.then(function (something) {
+    console.log(something);
 })
 .catch(function (err) {
     console.trace(err);

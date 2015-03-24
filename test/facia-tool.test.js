@@ -1,5 +1,6 @@
 /*jshint -W030 */
 var expect = require('chai').expect;
+var moment = require('moment');
 
 describe('facia-tool', function () {
 	var aws = require('../lib/aws');
@@ -300,6 +301,97 @@ describe('facia-tool', function () {
 			expect(list.length).to.equal(2);
 			expect(list[0].raw.live[0].id).to.equal('first');
 			expect(list[1].raw.draft[0].id).to.equal('second');
+		});
+	});
+
+	it('history collection - today', function () {
+		aws.setS3({
+			listObjects: function (obj, callback) {
+				if (obj.Prefix.indexOf(moment().format('YYYY/MM/DD')) > -1) {
+					callback(null, {
+						Contents: [
+							{Key: 'TEST/collection/history/2015/03/22/2015-03-22T15:00:00.000Z.someone.here@guardian.co.uk.json'},
+							{Key: 'TEST/collection/history/2015/03/24/2015-03-24T16:00:00.000Z.another.name@guardian.co.uk.json'}
+						],
+						IsTruncated: false
+					});
+				} else {
+					callback(new Error('invalid request'));
+				}
+			},
+			getObject: function (obj, callback) {
+				if (obj.Key.indexOf('22T') > -1) {
+					callback(null, {
+						Body: JSON.stringify({
+							live: [{live: [{id: 'one'}]}]
+						})
+					});
+				} else if (obj.Key.indexOf('24T') > -1) {
+					callback(null, {
+						Body: JSON.stringify({
+							draft: [{live: [{id: 'one'}], draft: [{id: 'two'}]}]
+						})
+					});
+				} else {
+					callback(new Error('nope'));
+				}
+			}
+		});
+
+		return tool.historyCollection('a-collection').then(function (list) {
+			expect(list.length).to.equal(1);
+		});
+	});
+
+	it('history collection - since', function () {
+		aws.setS3({
+			listObjects: function (obj, callback) {
+				if (obj.Prefix.indexOf(moment().format('YYYY/MM/DD')) > -1) {
+					callback(null, {
+						Contents: [
+							{Key: 'TEST/collection/history/2015/03/22/2015-03-22T15:00:00.000Z.someone.here@guardian.co.uk.json'},
+							{Key: 'TEST/collection/history/2015/03/24/2015-03-24T16:00:00.000Z.another.name@guardian.co.uk.json'}
+						],
+						IsTruncated: false
+					});
+				} else if (obj.Prefix.indexOf(moment().subtract(24, 'hours').format('YYYY/MM/DD')) > -1) {
+					callback(null, {
+						Contents: [
+							{Key: 'TEST/collection/history/2015/03/26/2015-03-26T16:00:00.000Z.another.name@guardian.co.uk.json'}
+						],
+						IsTruncated: false
+					});
+				} else {
+					callback(new Error('invalid request'));
+				}
+			},
+			getObject: function (obj, callback) {
+				if (obj.Key.indexOf('22T') > -1) {
+					callback(null, {
+						Body: JSON.stringify({
+							live: [{live: [{id: 'one'}]}]
+						})
+					});
+				} else if (obj.Key.indexOf('24T') > -1) {
+					callback(null, {
+						Body: JSON.stringify({
+							draft: [{live: [{id: 'one'}], draft: [{id: 'two'}]}]
+						})
+					});
+				} else if (obj.Key.indexOf('26T') > -1) {
+					callback(null, {
+						Body: JSON.stringify({
+							draft: [{live: [{id: 'one'}, {id: 'two'}]}]
+						})
+					});
+				} else {
+					callback(new Error('nope'));
+				}
+			}
+		});
+
+		return tool.historyCollection('a-collection', moment().subtract(24, 'hours')).then(function (list) {
+			expect(list.length).to.equal(2);
 		});
 	});
 });
