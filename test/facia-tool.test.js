@@ -142,4 +142,80 @@ describe('facia-tool', function () {
 			});
 		});
 	});
+
+	it('config history', function () {
+		aws.setS3({
+			listObjects: function (obj, callback) {
+				callback(null, {
+					Contents: [
+						{Key: 'TEST/history/2015-03-22T15:00:00.000Z.someone.here@guardian.co.uk.json'},
+						{Key: 'TEST/history/2015-03-24T16:00:00.000Z.another.name@guardian.co.uk.json'},
+						{Key: 'TEST/history/2015-03-26T17:00:00.000Z.someone.here@guardian.co.uk.json'}
+					],
+					IsTruncated: false
+				});
+			},
+			getObject: function (obj, callback) {
+				if (obj.Key.indexOf('22T') > -1) {
+					callback(null, {
+						Body: '{"collections": {"one": {}}}'
+					});
+				} else if (obj.Key.indexOf('24T') > -1) {
+					callback(null, {
+						Body: '{"collections": {"two": {}}}'
+					});
+				} else if (obj.Key.indexOf('26T') > -1) {
+					callback(null, {
+						Body: '{"collections": {"three": {}}}'
+					});
+				} else {
+					callback(new Error('nope'));
+				}
+			}
+		});
+
+		return tool.historyConfig().then(function (list) {
+			expect(list.length).to.equal(3);
+			expect(list.all[0].author).to.equal('someone.here@guardian.co.uk');
+			expect(list.all[0].config.hasCollection('one')).to.equal(true);
+			expect(list.all[1].author).to.equal('another.name@guardian.co.uk');
+			expect(list.all[1].config.hasCollection('two')).to.equal(true);
+			expect(list.all[2].author).to.equal('someone.here@guardian.co.uk');
+			expect(list.all[2].config.hasCollection('three')).to.equal(true);
+		});
+	});
+
+	it('config history - fail on list', function (done) {
+		aws.setS3({
+			listObjects: function (obj, callback) {
+				callback(new Error('nope'));
+			}
+		});
+
+		tool.historyConfig().catch(function (err) {
+			expect(err).to.be.instanceof(Error);
+			done();
+		});
+	});
+
+	it('config history - fail on bucket', function (done) {
+		aws.setS3({
+			listObjects: function (obj, callback) {
+				callback(null, {
+					Contents: [
+						{Key: 'TEST/history/2015-03-22T15:00:00.000Z.someone.here@guardian.co.uk.json'}
+					],
+					IsTruncated: false
+				});
+			},
+			getObject: function (obj, callback) {
+				callback(new Error('nope'));
+			}
+		});
+
+		tool.historyConfig().catch(function (err) {
+			expect(err).to.be.instanceof(Error);
+			done();
+		});
+	});
 });
