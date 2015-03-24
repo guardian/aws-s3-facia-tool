@@ -3,6 +3,7 @@ var Promise = require('es6-promise').Promise;
 var FaciaTool = require('./lib/facia-tool');
 var config = require('./config');
 var aws = require('./lib/aws');
+var moment = require('moment');
 
 aws.setCache(true);
 
@@ -10,7 +11,11 @@ var tool = new FaciaTool(config);
 
 Promise.all([
     tool.fetchConfig(),
-    tool.listCollections()
+    tool.listCollections(),
+    tool.front({
+        front: 'au',
+        since: moment().subtract(24, 'hours')
+    })
 ])
 .then(function () {
     var notInConfig = tool.list.filter(function (object) {
@@ -58,6 +63,12 @@ Promise.all([
     });
 
     console.log(count);
+
+    var front = tool.lastFront;
+    return tool.findCollections(front.allCollectionsEver());
+})
+.then(function (list) {
+    console.log(list);
 })
 .catch(function (err) {
     console.trace(err);

@@ -10,7 +10,8 @@ describe('facia-tool', function () {
 	beforeEach(function () {
 		tool = new FaciaTool({
 			collectionsPrefix: 'collection',
-			env: 'TEST'
+			env: 'TEST',
+			configKey: 'please_config.json'
 		});
 		aws.setCache(false);
 	});
@@ -176,12 +177,12 @@ describe('facia-tool', function () {
 
 		return tool.historyConfig().then(function (list) {
 			expect(list.length).to.equal(3);
-			expect(list.all[0].author).to.equal('someone.here@guardian.co.uk');
-			expect(list.all[0].config.hasCollection('one')).to.equal(true);
+			expect(list.all[2].author).to.equal('someone.here@guardian.co.uk');
+			expect(list.all[2].config.hasCollection('one')).to.equal(true);
 			expect(list.all[1].author).to.equal('another.name@guardian.co.uk');
 			expect(list.all[1].config.hasCollection('two')).to.equal(true);
-			expect(list.all[2].author).to.equal('someone.here@guardian.co.uk');
-			expect(list.all[2].config.hasCollection('three')).to.equal(true);
+			expect(list.all[0].author).to.equal('someone.here@guardian.co.uk');
+			expect(list.all[0].config.hasCollection('three')).to.equal(true);
 		});
 	});
 
@@ -216,6 +217,89 @@ describe('facia-tool', function () {
 		tool.historyConfig().catch(function (err) {
 			expect(err).to.be.instanceof(Error);
 			done();
+		});
+	});
+
+	it('front', function () {
+		aws.setS3({
+			listObjects: function (obj, callback) {
+				callback(null, {
+					Contents: [
+						{Key: 'TEST/history/2015-03-22T15:00:00.000Z.someone.here@guardian.co.uk.json'},
+						{Key: 'TEST/history/2015-03-24T16:00:00.000Z.another.name@guardian.co.uk.json'}
+					],
+					IsTruncated: false
+				});
+			},
+			getObject: function (obj, callback) {
+				if (obj.Key.indexOf('22T') > -1) {
+					callback(null, {
+						Body: JSON.stringify({
+							collections: {one: {}, two: {}},
+							fronts: {uk: {collections : ['one', 'two']}}
+						})
+					});
+				} else if (obj.Key.indexOf('24T') > -1) {
+					callback(null, {
+						Body: JSON.stringify({
+							collections: {one: {}, two: {}},
+							fronts: {uk: {collections : ['one', 'two']}}
+						})
+					});
+				} else if (obj.Key.indexOf('please_config') > -1) {
+					callback(null, {
+						Body: JSON.stringify({
+							collections: {one: {}, two: {}},
+							fronts: {uk: {collections : ['one', 'two']}}
+						})
+					});
+				} else {
+					callback(new Error('nope'));
+				}
+			}
+		});
+
+		return tool.front({
+			front: 'uk'
+		}).then(function (front) {
+			expect(front.allCollectionsEver()).to.deep.equal(['one', 'two']);
+		});
+	});
+
+	it('find collections', function () {
+		aws.setS3({
+			listObjects: function (obj, callback) {
+				callback(null, {
+					Contents: [
+						{Key: 'TEST/history/2015-03-22T15:00:00.000Z.someone.here@guardian.co.uk.json'},
+						{Key: 'TEST/history/2015-03-24T16:00:00.000Z.another.name@guardian.co.uk.json'}
+					],
+					IsTruncated: false
+				});
+			},
+			getObject: function (obj, callback) {
+				if (obj.Key.indexOf('one') > -1) {
+					callback(null, {
+						Body: JSON.stringify({
+							live: [{id: 'first'}]
+						})
+					});
+				} else if (obj.Key.indexOf('two') > -1) {
+					callback(null, {
+						Body: JSON.stringify({
+							draft: [{id: 'second'}]
+						})
+					});
+				} else {
+					callback(new Error('nope'));
+				}
+			}
+		});
+
+		return tool.findCollections(['one', 'two', 'missing']).then(function (list) {
+			expect(list.length).to.equal(2);
+			expect(list[0].raw.live[0].id).to.equal('first');
+			expect(list[1].raw.draft[0].id).to.equal('second');
 		});
 	});
 });
