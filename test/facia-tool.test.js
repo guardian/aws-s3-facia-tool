@@ -55,10 +55,10 @@ describe('facia-tool', function () {
 			listObjects: function (obj, callback) {
 				callback(null, {
 					Contents: [
-						{Key: 'some-key'},
-						{Key: 'TEST/collection/one/collection.json'},
-						{Key: 'TEST/collection/two/collection.json'},
-						{Key: 'TEST/collection/three/collection.json'}
+						{ Key: 'some-key' },
+						{ Key: 'TEST/collection/one/collection.json' },
+						{ Key: 'TEST/collection/two/collection.json' },
+						{ Key: 'TEST/collection/three/collection.json' }
 					],
 					IsTruncated: false
 				});
@@ -88,7 +88,7 @@ describe('facia-tool', function () {
 			listObjects: function (obj, callback) {
 				callback(null, {
 					Contents: [
-						{Key: 'TEST/collection/one/collection.json'}
+						{ Key: 'TEST/collection/one/collection.json' }
 					],
 					IsTruncated: false
 				});
@@ -124,7 +124,7 @@ describe('facia-tool', function () {
 			listObjects: function (obj, callback) {
 				callback(null, {
 					Contents: [
-						{Key: 'TEST/collection/one/collection.json'}
+						{ Key: 'TEST/collection/one/collection.json' }
 					],
 					IsTruncated: false
 				});
@@ -150,9 +150,9 @@ describe('facia-tool', function () {
 			listObjects: function (obj, callback) {
 				callback(null, {
 					Contents: [
-						{Key: 'TEST/history/2015-03-22T15:00:00.000Z.someone.here@guardian.co.uk.json'},
-						{Key: 'TEST/history/2015-03-24T16:00:00.000Z.another.name@guardian.co.uk.json'},
-						{Key: 'TEST/history/2015-03-26T17:00:00.000Z.someone.here@guardian.co.uk.json'}
+						{ Key: 'TEST/history/2015-03-22T15:00:00.000Z.someone.here@guardian.co.uk.json' },
+						{ Key: 'TEST/history/2015-03-24T16:00:00.000Z.another.name@guardian.co.uk.json' },
+						{ Key: 'TEST/history/2015-03-26T17:00:00.000Z.someone.here@guardian.co.uk.json' }
 					],
 					IsTruncated: false
 				});
@@ -205,7 +205,7 @@ describe('facia-tool', function () {
 			listObjects: function (obj, callback) {
 				callback(null, {
 					Contents: [
-						{Key: 'TEST/history/2015-03-22T15:00:00.000Z.someone.here@guardian.co.uk.json'}
+						{ Key: 'TEST/history/2015-03-22T15:00:00.000Z.someone.here@guardian.co.uk.json' }
 					],
 					IsTruncated: false
 				});
@@ -221,13 +221,46 @@ describe('facia-tool', function () {
 		});
 	});
 
+	it('fetch collection', function () {
+		aws.setS3({
+			getObject: function (obj, callback) {
+				var id = obj.Key.replace('/collection.json', '').split('/').pop();
+				callback(null, {
+					Body: JSON.stringify({
+						live: [{ id: id }]
+					})
+				});
+			}
+		});
+
+		return tool.fetchCollection('first').then(function (collection) {
+			expect(collection.id).to.equal('first');
+			expect(collection.raw).to.deep.equal({
+				live: [{ id: 'first' }]
+			});
+		});
+	});
+
+	it('fetch collection - fail', function (done) {
+		aws.setS3({
+			getObject: function (obj, callback) {
+				callback(new Error('collection missing'));
+			}
+		});
+
+		tool.fetchCollection('non_existing').catch(function (err) {
+			expect(err).to.be.instanceof(Error);
+			done();
+		});
+	});
+
 	it('front', function () {
 		aws.setS3({
 			listObjects: function (obj, callback) {
 				callback(null, {
 					Contents: [
-						{Key: 'TEST/history/2015-03-22T15:00:00.000Z.someone.here@guardian.co.uk.json'},
-						{Key: 'TEST/history/2015-03-24T16:00:00.000Z.another.name@guardian.co.uk.json'}
+						{ Key: 'TEST/history/2015-03-22T15:00:00.000Z.someone.here@guardian.co.uk.json' },
+						{ Key: 'TEST/history/2015-03-24T16:00:00.000Z.another.name@guardian.co.uk.json' }
 					],
 					IsTruncated: false
 				});
@@ -236,22 +269,22 @@ describe('facia-tool', function () {
 				if (obj.Key.indexOf('22T') > -1) {
 					callback(null, {
 						Body: JSON.stringify({
-							collections: {one: {}, two: {}},
-							fronts: {uk: {collections : ['one', 'two']}}
+							collections: { one: {}, two: {} },
+							fronts: { uk: { collections: ['one', 'two'] } }
 						})
 					});
 				} else if (obj.Key.indexOf('24T') > -1) {
 					callback(null, {
 						Body: JSON.stringify({
-							collections: {one: {}, two: {}},
-							fronts: {uk: {collections : ['one', 'two']}}
+							collections: { one: {}, two: {} },
+							fronts: { uk: { collections: ['one', 'two'] } }
 						})
 					});
 				} else if (obj.Key.indexOf('please_config') > -1) {
 					callback(null, {
 						Body: JSON.stringify({
-							collections: {one: {}, two: {}},
-							fronts: {uk: {collections : ['one', 'two']}}
+							collections: { one: {}, two: {} },
+							fronts: { uk: { collections: ['one', 'two'] } }
 						})
 					});
 				} else {
@@ -272,8 +305,8 @@ describe('facia-tool', function () {
 			listObjects: function (obj, callback) {
 				callback(null, {
 					Contents: [
-						{Key: 'TEST/history/2015-03-22T15:00:00.000Z.someone.here@guardian.co.uk.json'},
-						{Key: 'TEST/history/2015-03-24T16:00:00.000Z.another.name@guardian.co.uk.json'}
+						{ Key: 'TEST/history/2015-03-22T15:00:00.000Z.someone.here@guardian.co.uk.json' },
+						{ Key: 'TEST/history/2015-03-24T16:00:00.000Z.another.name@guardian.co.uk.json' }
 					],
 					IsTruncated: false
 				});
@@ -282,13 +315,13 @@ describe('facia-tool', function () {
 				if (obj.Key.indexOf('one') > -1) {
 					callback(null, {
 						Body: JSON.stringify({
-							live: [{id: 'first'}]
+							live: [{ id: 'first' }]
 						})
 					});
 				} else if (obj.Key.indexOf('two') > -1) {
 					callback(null, {
 						Body: JSON.stringify({
-							draft: [{id: 'second'}]
+							draft: [{ id: 'second' }]
 						})
 					});
 				} else {
@@ -310,8 +343,8 @@ describe('facia-tool', function () {
 				if (obj.Prefix.indexOf(moment().format('YYYY/MM/DD')) > -1) {
 					callback(null, {
 						Contents: [
-							{Key: 'TEST/collection/history/2015/03/22/2015-03-22T15:00:00.000Z.someone.here@guardian.co.uk.json'},
-							{Key: 'TEST/collection/history/2015/03/24/2015-03-24T16:00:00.000Z.another.name@guardian.co.uk.json'}
+							{ Key: 'TEST/collection/history/2015/03/22/2015-03-22T15:00:00.000Z.someone.here@guardian.co.uk.json' },
+							{ Key: 'TEST/collection/history/2015/03/24/2015-03-24T16:00:00.000Z.another.name@guardian.co.uk.json' }
 						],
 						IsTruncated: false
 					});
@@ -323,13 +356,13 @@ describe('facia-tool', function () {
 				if (obj.Key.indexOf('22T') > -1) {
 					callback(null, {
 						Body: JSON.stringify({
-							live: [{live: [{id: 'one'}]}]
+							live: [{ live: [{ id: 'one' }] }]
 						})
 					});
 				} else if (obj.Key.indexOf('24T') > -1) {
 					callback(null, {
 						Body: JSON.stringify({
-							draft: [{live: [{id: 'one'}], draft: [{id: 'two'}]}]
+							draft: [{ live: [{ id: 'one' }], draft: [{ id: 'two' }] }]
 						})
 					});
 				} else {
@@ -349,15 +382,15 @@ describe('facia-tool', function () {
 				if (obj.Prefix.indexOf(moment().format('YYYY/MM/DD')) > -1) {
 					callback(null, {
 						Contents: [
-							{Key: 'TEST/collection/history/2015/03/22/2015-03-22T15:00:00.000Z.someone.here@guardian.co.uk.json'},
-							{Key: 'TEST/collection/history/2015/03/24/2015-03-24T16:00:00.000Z.another.name@guardian.co.uk.json'}
+							{ Key: 'TEST/collection/history/2015/03/22/2015-03-22T15:00:00.000Z.someone.here@guardian.co.uk.json' },
+							{ Key: 'TEST/collection/history/2015/03/24/2015-03-24T16:00:00.000Z.another.name@guardian.co.uk.json' }
 						],
 						IsTruncated: false
 					});
 				} else if (obj.Prefix.indexOf(moment().subtract(24, 'hours').format('YYYY/MM/DD')) > -1) {
 					callback(null, {
 						Contents: [
-							{Key: 'TEST/collection/history/2015/03/26/2015-03-26T16:00:00.000Z.another.name@guardian.co.uk.json'}
+							{ Key: 'TEST/collection/history/2015/03/26/2015-03-26T16:00:00.000Z.another.name@guardian.co.uk.json' }
 						],
 						IsTruncated: false
 					});
@@ -369,19 +402,19 @@ describe('facia-tool', function () {
 				if (obj.Key.indexOf('22T') > -1) {
 					callback(null, {
 						Body: JSON.stringify({
-							live: [{live: [{id: 'one'}]}]
+							live: [{ live: [{ id: 'one' }] }]
 						})
 					});
 				} else if (obj.Key.indexOf('24T') > -1) {
 					callback(null, {
 						Body: JSON.stringify({
-							draft: [{live: [{id: 'one'}], draft: [{id: 'two'}]}]
+							draft: [{ live: [{ id: 'one' }], draft: [{ id: 'two' }] }]
 						})
 					});
 				} else if (obj.Key.indexOf('26T') > -1) {
 					callback(null, {
 						Body: JSON.stringify({
-							draft: [{live: [{id: 'one'}, {id: 'two'}]}]
+							draft: [{ live: [{ id: 'one' }, { id: 'two' }] }]
 						})
 					});
 				} else {
