@@ -1,7 +1,7 @@
 {
   "name": "aws-s3-facia-tool",
   "description": "Iterate on S3 buckets in facia tool",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "main": "lib/facia-tool.js",
   "dependencies": {
     "async": "^0.9.0",
@@ -9,7 +9,8 @@
     "es6-promise": "^2.0.1",
     "lodash": "^3.5.0",
     "mkdirp": "^0.5.0",
-    "moment": "^2.9.0"
+    "moment": "^2.9.0",
+    "sift": "^1.1.0"
   },
   "scripts": {
     "lint": "jshint .",
@@ -17,7 +18,8 @@
     "pretest": "npm run-script lint && npm run-script checkStyle",
     "test": "istanbul cover ./node_modules/.bin/_mocha test",
     "posttest": "istanbul check-coverage --statements 85 --branches 70 --functions 100 --lines 90",
-    "prepublish": "npm test && npm prune"
+    "prepublish": "npm test && npm prune",
+    "watchTests": "mocha test -w"
   },
   "publishConfig": {
     "registry": "http://registry.npmjs.org"

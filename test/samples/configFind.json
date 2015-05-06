@@ -1,0 +1,33 @@
+{
+	"fronts": {
+		"one": {
+			"a": "text"
+		},
+		"two": {
+			"a": "more text"
+		},
+		"three": {
+			"b": ["c1", "c2", "c3"]
+		},
+		"four": {
+			"a": "string",
+			"b": ["c2"]
+		},
+		"five": {
+			"a": "text",
+			"c": 20
+		},
+		"six": {
+			"a": "out of order",
+			"b": ["c2", "c3", "c1"]
+		}
+	},
+	"collections": {
+		"one": {
+			"a": "some"
+		},
+		"two": {
+			"a": "other"
+		}
+	}
+}
