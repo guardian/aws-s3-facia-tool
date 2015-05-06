@@ -24,10 +24,22 @@
 	},
 	"collections": {
 		"one": {
-			"a": "some"
+			"collection": {
+				"live": [{
+					"id": "a"
+				}, {
+					"id": "b"
+				}]
+			}
 		},
 		"two": {
-			"a": "other"
+			"collection": {
+				"live": [{
+					"id": "a"
+				}, {
+					"id": "c"
+				}]
+			}
 		}
 	}
 }

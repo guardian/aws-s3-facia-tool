@@ -65,7 +65,7 @@ describe('config', function () {
 		var instance = new Config(jsonFind);
 
 		expect(instance.collections.find({
-			a: 'some'
+			'collection.live.id': 'b'
 		})).to.deep.equal([jsonFind.collections.one]);
 	});
 });
