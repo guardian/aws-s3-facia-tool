@@ -1,6 +1,7 @@
 var expect = require('chai').expect;
 var json = require('./samples/config.json');
 var jsonFind = require('./samples/configFind.json');
+var _ = require('lodash');
 
 describe('config', function () {
 	var Config = require('../lib/config');
@@ -10,15 +11,33 @@ describe('config', function () {
 
 		expect(instance.hasCollection('missing-collection')).to.equal(false);
 		expect(instance.hasCollection('83b9699d-a46e-4bfd-91f6-8496ac21b000')).to.equal(true);
-		expect(instance.front('uk')).to.deep.equal({
+		var front = instance.front('uk').toJSON();
+		expect(front).to.deep.equal({
+			'_id': 'uk',
+			'config': {
+				'collections': [
+					'9e0d5e94-3f24-4f0f-bdd5-bdd07aff6838',
+					'b4051e8c-9d75-4ef9-b3da-18f11a20b41c',
+					'b951b658-5b69-4890-91fd-5b50b500f61c',
+					'3b6c3b04-0f6e-4679-80f6-97967de8eb61'
+				]
+			},
 			'collections': [
-				'9e0d5e94-3f24-4f0f-bdd5-bdd07aff6838',
-				'b4051e8c-9d75-4ef9-b3da-18f11a20b41c',
-				'b951b658-5b69-4890-91fd-5b50b500f61c',
-				'3b6c3b04-0f6e-4679-80f6-97967de8eb61'
+				_.assign({
+					'_id': '9e0d5e94-3f24-4f0f-bdd5-bdd07aff6838',
+				}, json.collections['9e0d5e94-3f24-4f0f-bdd5-bdd07aff6838']),
+				_.assign({
+					'_id': 'b4051e8c-9d75-4ef9-b3da-18f11a20b41c'
+				}, json.collections['b4051e8c-9d75-4ef9-b3da-18f11a20b41c']),
+				_.assign({
+					'_id': 'b951b658-5b69-4890-91fd-5b50b500f61c'
+				}, json.collections['b951b658-5b69-4890-91fd-5b50b500f61c']),
+				_.assign({
+					'_id': '3b6c3b04-0f6e-4679-80f6-97967de8eb61'
+				}, json.collections['3b6c3b04-0f6e-4679-80f6-97967de8eb61'])
 			]
 		});
-		expect(instance.collection('83b9699d-a46e-4bfd-91f6-8496ac21b000')).to.deep.equal({
+		expect(instance.collection('83b9699d-a46e-4bfd-91f6-8496ac21b000').toJSON().config).to.deep.equal({
 			'displayName': 'External links',
 			'type': 'nav/list'
 		});
@@ -27,45 +46,51 @@ describe('config', function () {
 	it('finds a front', function () {
 		var instance = new Config(jsonFind);
 		var allResults = Object.keys(jsonFind.fronts).map(function (key) {
-			return jsonFind.fronts[key];
+			return key;
 		});
+		var getId = function (results) {
+			return results.map(function (front) {
+				return front.toJSON()._id;
+			});
+		}
 
-		expect(instance.fronts.find()).to.deep.equal(allResults);
-		expect(instance.fronts.find({})).to.deep.equal(allResults);
-		expect(instance.fronts.find({
-			a: 'text'
-		})).to.deep.equal([jsonFind.fronts.one, jsonFind.fronts.five]);
-		expect(instance.fronts.find({
-			a: { $in: ['text', 'string'] }
-		})).to.deep.equal([jsonFind.fronts.one, jsonFind.fronts.four, jsonFind.fronts.five]);
-		expect(instance.fronts.find({
-			a: 'text',
-			c: 20
-		})).to.deep.equal([jsonFind.fronts.five]);
-		expect(instance.fronts.find({
-			$or: [ { a: 'string' }, { c: 20 } ]
-		})).to.deep.equal([jsonFind.fronts.four, jsonFind.fronts.five]);
-		// This doesn't work on sift
-		// expect(instance.fronts.find({
-		// 	'b': ['c1', 'c2', 'c3']
-		// })).to.deep.equal([jsonFind.fronts.three]);
-		expect(instance.fronts.find({
-			'b': 'c1'
-		})).to.deep.equal([jsonFind.fronts.three, jsonFind.fronts.six]);
-		// This doesn't work on sift
-		// expect(instance.fronts.find({
-		// 	'b.0': 'c1'
-		// })).to.deep.equal([jsonFind.fronts.three]);
-		expect(instance.fronts.find({
-			'a': { $regex: /text/ }
-		})).to.deep.equal([jsonFind.fronts.one, jsonFind.fronts.two, jsonFind.fronts.five]);
+		expect(getId(instance.fronts.find())).to.deep.equal(allResults);
+		expect(getId(instance.fronts.find({}))).to.deep.equal(allResults);
+		expect(getId(instance.fronts.find({
+			'config.a': 'text'
+		}))).to.deep.equal(['one', 'five']);
+		expect(getId(instance.fronts.find({
+			'config.a': { $in: ['text', 'string'] }
+		}))).to.deep.equal(['one', 'four', 'five']);
+		expect(getId(instance.fronts.find({
+			'config.a': 'text',
+			'config.c': 20
+		}))).to.deep.equal(['five']);
+		expect(getId(instance.fronts.find({
+			$or: [ { 'config.a': 'string' }, { 'config.c': 20 } ]
+		}))).to.deep.equal(['four', 'five']);
+		expect(getId(instance.fronts.find({
+			'config.b': 'c1'
+		}))).to.deep.equal(['three', 'six']);
+		expect(getId(instance.fronts.find({
+			'config.a': { $regex: /text/ }
+		}))).to.deep.equal(['one', 'two', 'five']);
 	});
 
 	it('finds a collection', function () {
 		var instance = new Config(jsonFind);
+		var toJSON = function (results) {
+			return results.map(function (collection) {
+				return collection.toJSON();
+			});
+		}
 
-		expect(instance.collections.find({
-			'collection.live.id': 'b'
-		})).to.deep.equal([jsonFind.collections.one]);
+		expect(toJSON(instance.collections.find({
+			'config.collection.live.id': 'b'
+		}))).to.deep.equal([{
+			'_id': 'one',
+			config: jsonFind.collections.one,
+			collection: null
+		}]);
 	});
 });

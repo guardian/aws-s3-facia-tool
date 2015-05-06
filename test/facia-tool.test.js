@@ -95,7 +95,7 @@ describe('facia-tool', function () {
 			}
 		});
 
-		return tool.listCollections().then(function () {
+		return tool.listCollections().then(function (list) {
 			aws.setS3({
 				getObject: function (obj, callback) {
 					callback(null, {
@@ -104,7 +104,7 @@ describe('facia-tool', function () {
 				}
 			});
 
-			return tool.fetchCollections().then(function (collections) {
+			return tool.fetchCollections(list).then(function (collections) {
 				expect(collections.length).to.equal(1);
 				var iterate = {};
 				collections[0].eachArticle(function (container, article) {
@@ -324,6 +324,13 @@ describe('facia-tool', function () {
 							draft: [{ id: 'second' }]
 						})
 					});
+				} else if (obj.Key.indexOf('please_config') > -1) {
+					callback(null, {
+						Body: JSON.stringify({
+							collections: { one: { num: 1 }, two: {} },
+							fronts: { uk: { collections: ['one', 'two'] } }
+						})
+					});
 				} else {
 					callback(new Error('nope'));
 				}
@@ -332,6 +339,52 @@ describe('facia-tool', function () {
 
 		return tool.findCollections(['one', 'two', 'missing']).then(function (list) {
 			expect(list.length).to.equal(2);
+			expect(list[0].config.num).to.equal(1);
+			expect(list[0].raw.live[0].id).to.equal('first');
+			expect(list[1].raw.draft[0].id).to.equal('second');
+		});
+	});
+
+	it('find all collections', function () {
+		aws.setS3({
+			listObjects: function (obj, callback) {
+				callback(null, {
+					Contents: [
+						{ Key: 'TEST/history/2015-03-22T15:00:00.000Z.someone.here@guardian.co.uk.json' },
+						{ Key: 'TEST/history/2015-03-24T16:00:00.000Z.another.name@guardian.co.uk.json' }
+					],
+					IsTruncated: false
+				});
+			},
+			getObject: function (obj, callback) {
+				if (obj.Key.indexOf('one') > -1) {
+					callback(null, {
+						Body: JSON.stringify({
+							live: [{ id: 'first' }]
+						})
+					});
+				} else if (obj.Key.indexOf('two') > -1) {
+					callback(null, {
+						Body: JSON.stringify({
+							draft: [{ id: 'second' }]
+						})
+					});
+				} else if (obj.Key.indexOf('please_config') > -1) {
+					callback(null, {
+						Body: JSON.stringify({
+							collections: { one: { num: 1 }, two: {} },
+							fronts: { uk: { collections: ['one', 'two'] } }
+						})
+					});
+				} else {
+					callback(new Error('nope'));
+				}
+			}
+		});
+
+		return tool.findCollections().then(function (list) {
+			expect(list.length).to.equal(2);
+			expect(list[0].config.num).to.equal(1);
 			expect(list[0].raw.live[0].id).to.equal('first');
 			expect(list[1].raw.draft[0].id).to.equal('second');
 		});

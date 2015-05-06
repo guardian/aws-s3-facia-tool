@@ -4,15 +4,11 @@ describe('collection', function () {
 	var Collection = require('../lib/collection');
 
 	it('iterates on articles', function () {
-		var instance = new Collection({
-			object: {
-				id: 'collection_id'
-			},
-			json: {
-				live: [{ id: 'one' }],
-				draft: [{ id: 'one' }, {id: 'two', url: 'there' }],
-				treats: [{ id: 'three' }]
-			}
+		var instance = new Collection('collection_id', { collections: {} });
+		instance.setContent({
+			live: [{ id: 'one' }],
+			draft: [{ id: 'one' }, { id: 'two', url: 'there' }],
+			treats: [{ id: 'three' }]
 		});
 
 		var idCalled = {};
@@ -28,13 +24,9 @@ describe('collection', function () {
 	});
 
 	it('iterates on articles only live', function () {
-		var instance = new Collection({
-			object: {
-				id: 'collection_id'
-			},
-			json: {
-				live: [{ id: 'two' }]
-			}
+		var instance = new Collection('collection_id', { collections: {} });
+		instance.setContent({
+			live: [{ id: 'two' }]
 		});
 
 		var idCalled = {};

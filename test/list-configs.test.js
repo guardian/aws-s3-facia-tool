@@ -7,8 +7,8 @@ describe('list-configs', function () {
 
 	it('no time', function () {
 		var list = new List('ignore', null, [
-			{Key: 'ignore/2015-03-22T15:00:00.000Z.someone.here@guardian.co.uk.json'},
-			{Key: 'ignore/2015-03-20T09:30:00.000Z.another_name@guardian.co.uk.json'}
+			{ Key: 'ignore/2015-03-22T15:00:00.000Z.someone.here@guardian.co.uk.json' },
+			{ Key: 'ignore/2015-03-20T09:30:00.000Z.another_name@guardian.co.uk.json' }
 		]);
 
 		expect(list.length).to.equal(2);
@@ -26,8 +26,8 @@ describe('list-configs', function () {
 
 	it('filters time', function () {
 		var list = new List('ignore', moment('2015-03-20T10:00:00.000Z'), [
-			{Key: 'ignore/2015-03-22T15:00:00.000Z.someone.here@guardian.co.uk.json'},
-			{Key: 'ignore/2015-03-20T09:30:00.000Z.another_name@guardian.co.uk.json'}
+			{ Key: 'ignore/2015-03-22T15:00:00.000Z.someone.here@guardian.co.uk.json' },
+			{ Key: 'ignore/2015-03-20T09:30:00.000Z.another_name@guardian.co.uk.json' }
 		]);
 
 		expect(list.length).to.equal(1);
