@@ -1,29 +1,36 @@
 {
 	"fronts": {
 		"one": {
+			"_id": "one",
 			"a": "text"
 		},
 		"two": {
+			"_id": "two",
 			"a": "more text"
 		},
 		"three": {
+			"_id": "three",
 			"b": ["c1", "c2", "c3"]
 		},
 		"four": {
+			"_id": "four",
 			"a": "string",
 			"b": ["c2"]
 		},
 		"five": {
+			"_id": "five",
 			"a": "text",
 			"c": 20
 		},
 		"six": {
+			"_id": "six",
 			"a": "out of order",
 			"b": ["c2", "c3", "c1"]
 		}
 	},
 	"collections": {
 		"one": {
+			"_id": "one",
 			"collection": {
 				"live": [{
 					"id": "a"
@@ -33,6 +40,7 @@
 			}
 		},
 		"two": {
+			"_id": "two",
 			"collection": {
 				"live": [{
 					"id": "a"
