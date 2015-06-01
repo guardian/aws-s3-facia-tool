@@ -12,7 +12,11 @@ var tool = new FaciaTool(config);
 Promise.all([
     tool.fetchConfig(),
     tool.listCollections(),
-    tool.front({
+    tool.front('fabio-banana'),
+    tool.history.config(moment().subtract(4, 'days')),
+    tool.history.collection('uk-alpha/news/regular-stories', moment().subtract(4, 'days')),
+    tool.history.collection('e29ca504-c23b-4dca-9f41-5f2885c5e917', moment().subtract(4, 'days')),
+    tool.history.front({
         front: 'fabio-banana',
         since: moment().subtract(24, 'hours')
     })

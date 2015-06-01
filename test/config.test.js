@@ -35,7 +35,8 @@ describe('config', function () {
 				_.assign({
 					'_id': '3b6c3b04-0f6e-4679-80f6-97967de8eb61'
 				}, json.collections['3b6c3b04-0f6e-4679-80f6-97967de8eb61'])
-			]
+			],
+			'collectionsFull': {}
 		});
 		expect(instance.collection('83b9699d-a46e-4bfd-91f6-8496ac21b000').toJSON().config).to.deep.equal({
 			'displayName': 'External links',

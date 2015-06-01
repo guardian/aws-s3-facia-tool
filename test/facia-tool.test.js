@@ -1,6 +1,5 @@
 /*jshint -W030 */
 var expect = require('chai').expect;
-var moment = require('moment');
 
 describe('facia-tool', function () {
 	var aws = require('../lib/aws');
@@ -145,82 +144,6 @@ describe('facia-tool', function () {
 		});
 	});
 
-	it('config history', function () {
-		aws.setS3({
-			listObjects: function (obj, callback) {
-				callback(null, {
-					Contents: [
-						{ Key: 'TEST/history/2015-03-22T15:00:00.000Z.someone.here@guardian.co.uk.json' },
-						{ Key: 'TEST/history/2015-03-24T16:00:00.000Z.another.name@guardian.co.uk.json' },
-						{ Key: 'TEST/history/2015-03-26T17:00:00.000Z.someone.here@guardian.co.uk.json' }
-					],
-					IsTruncated: false
-				});
-			},
-			getObject: function (obj, callback) {
-				if (obj.Key.indexOf('22T') > -1) {
-					callback(null, {
-						Body: '{"collections": {"one": {}}}'
-					});
-				} else if (obj.Key.indexOf('24T') > -1) {
-					callback(null, {
-						Body: '{"collections": {"two": {}}}'
-					});
-				} else if (obj.Key.indexOf('26T') > -1) {
-					callback(null, {
-						Body: '{"collections": {"three": {}}}'
-					});
-				} else {
-					callback(new Error('nope'));
-				}
-			}
-		});
-
-		return tool.historyConfig().then(function (list) {
-			expect(list.length).to.equal(3);
-			expect(list.all[2].author).to.equal('someone.here@guardian.co.uk');
-			expect(list.all[2].config.hasCollection('one')).to.equal(true);
-			expect(list.all[1].author).to.equal('another.name@guardian.co.uk');
-			expect(list.all[1].config.hasCollection('two')).to.equal(true);
-			expect(list.all[0].author).to.equal('someone.here@guardian.co.uk');
-			expect(list.all[0].config.hasCollection('three')).to.equal(true);
-		});
-	});
-
-	it('config history - fail on list', function (done) {
-		aws.setS3({
-			listObjects: function (obj, callback) {
-				callback(new Error('nope'));
-			}
-		});
-
-		tool.historyConfig().catch(function (err) {
-			expect(err).to.be.instanceof(Error);
-			done();
-		});
-	});
-
-	it('config history - fail on bucket', function (done) {
-		aws.setS3({
-			listObjects: function (obj, callback) {
-				callback(null, {
-					Contents: [
-						{ Key: 'TEST/history/2015-03-22T15:00:00.000Z.someone.here@guardian.co.uk.json' }
-					],
-					IsTruncated: false
-				});
-			},
-			getObject: function (obj, callback) {
-				callback(new Error('nope'));
-			}
-		});
-
-		tool.historyConfig().catch(function (err) {
-			expect(err).to.be.instanceof(Error);
-			done();
-		});
-	});
-
 	it('fetch collection', function () {
 		aws.setS3({
 			getObject: function (obj, callback) {
@@ -256,34 +179,19 @@ describe('facia-tool', function () {
 
 	it('front', function () {
 		aws.setS3({
-			listObjects: function (obj, callback) {
-				callback(null, {
-					Contents: [
-						{ Key: 'TEST/history/2015-03-22T15:00:00.000Z.someone.here@guardian.co.uk.json' },
-						{ Key: 'TEST/history/2015-03-24T16:00:00.000Z.another.name@guardian.co.uk.json' }
-					],
-					IsTruncated: false
-				});
-			},
 			getObject: function (obj, callback) {
-				if (obj.Key.indexOf('22T') > -1) {
+				if (obj.Key.indexOf('one') > -1) {
 					callback(null, {
 						Body: JSON.stringify({
-							collections: { one: {}, two: {} },
-							fronts: { uk: { collections: ['one', 'two'] } }
+							live: [{ id: 'one' }]
 						})
 					});
-				} else if (obj.Key.indexOf('24T') > -1) {
-					callback(null, {
-						Body: JSON.stringify({
-							collections: { one: {}, two: {} },
-							fronts: { uk: { collections: ['one', 'two'] } }
-						})
-					});
+				} else if (obj.Key.indexOf('two') > -1) {
+					callback(new Error('never pressed'));
 				} else if (obj.Key.indexOf('please_config') > -1) {
 					callback(null, {
 						Body: JSON.stringify({
-							collections: { one: {}, two: {} },
+							collections: { one: { anything: 'here' }, two: {} },
 							fronts: { uk: { collections: ['one', 'two'] } }
 						})
 					});
@@ -293,10 +201,57 @@ describe('facia-tool', function () {
 			}
 		});
 
-		return tool.front({
-			front: 'uk'
-		}).then(function (front) {
-			expect(front.allCollectionsEver()).to.deep.equal(['one', 'two']);
+		return tool.front('uk').then(function (front) {
+			expect(front.toJSON()).to.deep.equal({
+				_id: 'uk',
+				config: { collections: ['one', 'two'] },
+				collections: [{
+					_id: 'one',
+					anything: 'here'
+				}, {
+					_id: 'two'
+				}],
+				collectionsFull: {
+					one: {
+						_id: 'one',
+						config: {
+							_id: 'one',
+							anything: 'here'
+						},
+						collection: {
+							live: [{ id: 'one' }]
+						}
+					}
+				}
+			});
+
+			expect(front.collection('one').toJSON()).to.deep.equal({
+				_id: 'one',
+				config: {
+					_id: 'one',
+					anything: 'here'
+				},
+				collection: {
+					live: [{ id: 'one' }]
+				}
+			});
+		});
+	});
+
+	it('front - doesn\'t exist', function () {
+		aws.setS3({
+			getObject: function (obj, callback) {
+				callback(null, {
+					Body: JSON.stringify({
+						collections: { one: {}, two: {} },
+						fronts: { uk: { collections: ['one', 'two'] } }
+					})
+				});
+			}
+		});
+
+		return tool.front('au/missing/front').catch(function (error) {
+			expect(error.message).to.match(/Unable to find/i);
 		});
 	});
 
@@ -387,97 +342,6 @@ describe('facia-tool', function () {
 			expect(list[0].config.num).to.equal(1);
 			expect(list[0].raw.live[0].id).to.equal('first');
 			expect(list[1].raw.draft[0].id).to.equal('second');
-		});
-	});
-
-	it('history collection - today', function () {
-		aws.setS3({
-			listObjects: function (obj, callback) {
-				if (obj.Prefix.indexOf(moment().format('YYYY/MM/DD')) > -1) {
-					callback(null, {
-						Contents: [
-							{ Key: 'TEST/collection/history/2015/03/22/2015-03-22T15:00:00.000Z.someone.here@guardian.co.uk.json' },
-							{ Key: 'TEST/collection/history/2015/03/24/2015-03-24T16:00:00.000Z.another.name@guardian.co.uk.json' }
-						],
-						IsTruncated: false
-					});
-				} else {
-					callback(new Error('invalid request'));
-				}
-			},
-			getObject: function (obj, callback) {
-				if (obj.Key.indexOf('22T') > -1) {
-					callback(null, {
-						Body: JSON.stringify({
-							live: [{ live: [{ id: 'one' }] }]
-						})
-					});
-				} else if (obj.Key.indexOf('24T') > -1) {
-					callback(null, {
-						Body: JSON.stringify({
-							draft: [{ live: [{ id: 'one' }], draft: [{ id: 'two' }] }]
-						})
-					});
-				} else {
-					callback(new Error('nope'));
-				}
-			}
-		});
-
-		return tool.historyCollection('a-collection').then(function (list) {
-			expect(list.length).to.equal(1);
-		});
-	});
-
-	it('history collection - since', function () {
-		aws.setS3({
-			listObjects: function (obj, callback) {
-				if (obj.Prefix.indexOf(moment().format('YYYY/MM/DD')) > -1) {
-					callback(null, {
-						Contents: [
-							{ Key: 'TEST/collection/history/2015/03/22/2015-03-22T15:00:00.000Z.someone.here@guardian.co.uk.json' },
-							{ Key: 'TEST/collection/history/2015/03/24/2015-03-24T16:00:00.000Z.another.name@guardian.co.uk.json' }
-						],
-						IsTruncated: false
-					});
-				} else if (obj.Prefix.indexOf(moment().subtract(24, 'hours').format('YYYY/MM/DD')) > -1) {
-					callback(null, {
-						Contents: [
-							{ Key: 'TEST/collection/history/2015/03/26/2015-03-26T16:00:00.000Z.another.name@guardian.co.uk.json' }
-						],
-						IsTruncated: false
-					});
-				} else {
-					callback(new Error('invalid request'));
-				}
-			},
-			getObject: function (obj, callback) {
-				if (obj.Key.indexOf('22T') > -1) {
-					callback(null, {
-						Body: JSON.stringify({
-							live: [{ live: [{ id: 'one' }] }]
-						})
-					});
-				} else if (obj.Key.indexOf('24T') > -1) {
-					callback(null, {
-						Body: JSON.stringify({
-							draft: [{ live: [{ id: 'one' }], draft: [{ id: 'two' }] }]
-						})
-					});
-				} else if (obj.Key.indexOf('26T') > -1) {
-					callback(null, {
-						Body: JSON.stringify({
-							draft: [{ live: [{ id: 'one' }, { id: 'two' }] }]
-						})
-					});
-				} else {
-					callback(new Error('nope'));
-				}
-			}
-		});
-
-		return tool.historyCollection('a-collection', moment().subtract(24, 'hours')).then(function (list) {
-			expect(list.length).to.equal(2);
 		});
 	});
 });
