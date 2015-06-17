@@ -1,16 +1,16 @@
 {
   "name": "aws-s3-facia-tool",
   "description": "Iterate on S3 buckets in facia tool",
-  "version": "0.3.2",
+  "version": "0.4.0",
   "main": "lib/facia-tool.js",
   "dependencies": {
-    "async": "^0.9.0",
-    "aws-sdk": "^2.1.26",
-    "es6-promise": "^2.1.1",
-    "lodash": "^3.8.0",
-    "mkdirp": "^0.5.0",
-    "moment": "^2.10.2",
-    "sift": "^1.1.0"
+    "async": "^1.2.1",
+    "aws-sdk": "^2.1.34",
+    "es6-promise": "^2.3.0",
+    "lodash": "^3.9.3",
+    "mkdirp": "^0.5.1",
+    "moment": "^2.10.3",
+    "sift": "^1.1.1"
   },
   "scripts": {
     "lint": "jshint .",
@@ -26,11 +26,11 @@
   },
   "license": "Apache 2.0",
   "devDependencies": {
-    "chai": "^2.3.0",
-    "istanbul": "^0.3.13",
+    "chai": "^3.0.0",
+    "istanbul": "^0.3.15",
     "jscs": "^1.13.1",
-    "jshint": "^2.7.0",
-    "mocha": "^2.2.4"
+    "jshint": "^2.8.0",
+    "mocha": "^2.2.5"
   },
   "repository": {
     "type": "git",
