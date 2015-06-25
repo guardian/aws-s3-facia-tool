@@ -1,4 +1,5 @@
 var expect = require('chai').expect;
+var moment = require('moment');
 
 describe('collection', function () {
 	var Collection = require('../lib/collection');
@@ -74,5 +75,27 @@ describe('collection', function () {
 		instance = new Collection('e', config);
 		fronts = instance.fronts();
 		expect(fronts.length).to.equal(0);
+	});
+
+	it('returns the last modified date', function () {
+		var config = {
+			fronts: { one: { collections: ['a'] } },
+			collections: { a: {} }
+		};
+
+		var instance = new Collection('a', config);
+		// There's no last modified until we fetch the body
+		expect(instance.lastUpdated()).to.equal(null);
+
+		// Missing lastUpdated in body
+		instance.setContent({
+			updatedBy: 'You'
+		});
+		expect(instance.lastUpdated()).to.equal(null);
+
+		instance.setContent({
+			lastUpdated: 1433154689097
+		});
+		expect(instance.lastUpdated().isSame('2015-06-01', 'day')).to.be.true;
 	});
 });
