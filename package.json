@@ -23,7 +23,7 @@
   "publishConfig": {
     "registry": "http://registry.npmjs.org"
   },
-  "license": "Apache 2.0",
+  "license": "MIT",
   "devDependencies": {
     "chai": "^3.0.0",
     "istanbul": "^0.3.15",
