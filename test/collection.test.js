@@ -1,5 +1,4 @@
 var expect = require('chai').expect;
-var moment = require('moment');
 
 describe('collection', function () {
 	var Collection = require('../lib/collection');
@@ -97,5 +96,20 @@ describe('collection', function () {
 			lastUpdated: 1433154689097
 		});
 		expect(instance.lastUpdated().isSame('2015-06-01', 'day')).to.be.true;
+	});
+
+	it('know if a collection is backfilled', function () {
+		var config = {
+			fronts: { one: { collections: ['a', 'b'] } },
+			collections: {
+				a: {},
+				b: { apiQuery: 'something' }
+			}
+		};
+
+		var instance = new Collection('a', config);
+		expect(instance.isBackfilled()).to.equal(false);
+		instance = new Collection('b', config);
+		expect(instance.isBackfilled()).to.equal(true);
 	});
 });

@@ -18,7 +18,8 @@ Promise.all([
     tool.history.front({
         front: 'fabio-banana',
         since: moment().subtract(24, 'hours')
-    })
+    }),
+    tool.fetchCollection('87b2ec4f-9ee5-4ede-a0e4-ed2c2e1cbfeb')
 ])
 .then(function () {
     var notInConfig = tool.list.filter(function (object) {
@@ -77,9 +78,7 @@ Promise.all([
 .then(function (something) {
     console.log(something);
 })
-.catch(function (err) {
-    console.trace(err);
-});
+.catch(console.trace);
 
 // function logHTML (collection, container, article, where, what) {
 //     console.log(container + ' article ' + article.id + ' in collection ' + collection.id +
