@@ -24,7 +24,7 @@ describe('config', function () {
 			},
 			'collections': [
 				_.assign({
-					'_id': '9e0d5e94-3f24-4f0f-bdd5-bdd07aff6838',
+					'_id': '9e0d5e94-3f24-4f0f-bdd5-bdd07aff6838'
 				}, json.collections['9e0d5e94-3f24-4f0f-bdd5-bdd07aff6838']),
 				_.assign({
 					'_id': 'b4051e8c-9d75-4ef9-b3da-18f11a20b41c'
@@ -53,7 +53,7 @@ describe('config', function () {
 			return results.map(function (front) {
 				return front.toJSON()._id;
 			});
-		}
+		};
 
 		expect(getId(instance.fronts.find())).to.deep.equal(allResults);
 		expect(getId(instance.fronts.find({}))).to.deep.equal(allResults);
@@ -84,7 +84,7 @@ describe('config', function () {
 			return results.map(function (collection) {
 				return collection.toJSON();
 			});
-		}
+		};
 
 		expect(toJSON(instance.collections.find({
 			'config.collection.live.id': 'b'

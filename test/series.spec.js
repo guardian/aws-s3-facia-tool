@@ -31,7 +31,7 @@ describe('Series', function () {
 			}]);
 
 			done();
-		})
+		});
 	});
 
 	it('runs in parallel failing at some point', function (done) {
@@ -51,6 +51,6 @@ describe('Series', function () {
 			expect(err.message).to.match(/wrong/);
 
 			done();
-		})
+		});
 	});
 });

@@ -1,4 +1,3 @@
-/*jshint -W030 */
 var expect = require('chai').expect;
 
 describe('cache', function () {

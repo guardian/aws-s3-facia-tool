@@ -14,12 +14,12 @@ describe('collection', function () {
 		var idCalled = {};
 		instance.eachArticle(function (container, article) {
 			idCalled[container + '__' + article.id] = article;
-		})
+		});
 		expect(idCalled).to.deep.equal({
 			'live__one': { id: 'one' },
 			'draft__one': { id: 'one' },
 			'draft__two': { id: 'two', url: 'there' },
-			'treats__three': { id: 'three' },
+			'treats__three': { id: 'three' }
 		});
 	});
 
@@ -32,7 +32,7 @@ describe('collection', function () {
 		var idCalled = {};
 		instance.eachArticle(function (container, article) {
 			idCalled[container + '__' + article.id] = article;
-		})
+		});
 		expect(idCalled).to.deep.equal({
 			'live__two': { id: 'two' }
 		});
