@@ -44,6 +44,14 @@ describe('config', function () {
 		});
 	});
 
+	it('has a front', function () {
+		var instance = new Config(json);
+
+		expect(instance.hasFront('uk')).to.be.true;
+		expect(instance.hasFront('two')).to.be.true;
+		expect(instance.hasFront('banana')).to.be.false;
+	});
+
 	it('finds a front', function () {
 		var instance = new Config(jsonFind);
 		var allResults = Object.keys(jsonFind.fronts).map(function (key) {
@@ -93,5 +101,19 @@ describe('config', function () {
 			config: jsonFind.collections.one,
 			collection: null
 		}]);
+	});
+
+	it('lists ids', function () {
+		var config = new Config({
+			fronts: {
+				afront: {},
+				bfront: {}
+			},
+			collections: {
+				collection: {}
+			}
+		});
+		expect(config.listFrontsIds()).to.deep.equal(['afront', 'bfront']);
+		expect(config.listCollectionsIds()).to.deep.equal(['collection']);
 	});
 });

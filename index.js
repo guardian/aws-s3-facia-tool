@@ -9,6 +9,7 @@ aws.setCache(true);
 var tool = new FaciaTool(config);
 
 Promise.all([
+    tool.fetchFronts(['uk', 'us']),
     tool.fetchConfig(),
     tool.listCollections(),
     tool.front('fabio-banana'),
