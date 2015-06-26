@@ -221,6 +221,13 @@ describe('facia-tool', function () {
 						collection: {
 							live: [{ id: 'one' }]
 						}
+					},
+					two: {
+						_id: 'two',
+						config: {
+							_id: 'two'
+						},
+						collection: null
 					}
 				}
 			});
@@ -252,6 +259,66 @@ describe('facia-tool', function () {
 
 		return tool.front('au/missing/front').catch(function (error) {
 			expect(error.message).to.match(/Unable to find/i);
+		});
+	});
+
+	it('front with uneditable collections', function () {
+		aws.setS3({
+			getObject: function (obj, callback) {
+				if (obj.Key.indexOf('one') > -1) {
+					throw new Error('collection one shouldn\'t be fetched');
+				} else if (obj.Key.indexOf('two') > -1) {
+					callback(new Error('never pressed'));
+				} else if (obj.Key.indexOf('please_config') > -1) {
+					callback(null, {
+						Body: JSON.stringify({
+							collections: { one: { uneditable: true }, two: {} },
+							fronts: { uk: { collections: ['one', 'two'] } }
+						})
+					});
+				} else {
+					callback(new Error('nope'));
+				}
+			}
+		});
+
+		return tool.front('uk').then(function (front) {
+			expect(front.toJSON()).to.deep.equal({
+				_id: 'uk',
+				config: { collections: ['one', 'two'] },
+				collections: [{
+					_id: 'one',
+					uneditable: true
+				}, {
+					_id: 'two'
+				}],
+				collectionsFull: {
+					one: {
+						_id: 'one',
+						config: {
+							_id: 'one',
+							uneditable: true
+						},
+						collection: null
+					},
+					two: {
+						_id: 'two',
+						config: {
+							_id: 'two'
+						},
+						collection: null
+					}
+				}
+			});
+
+			expect(front.collection('one').toJSON()).to.deep.equal({
+				_id: 'one',
+				config: {
+					_id: 'one',
+					uneditable: true
+				},
+				collection: null
+			});
 		});
 	});
 
