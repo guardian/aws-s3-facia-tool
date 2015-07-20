@@ -44,4 +44,22 @@ describe('Front', function () {
 		front.setCollection('four', four);
 		expect(front.lastUpdated().isSame(moment('01-07-2015', 'DD-MM-YYYY'), 'day')).to.be.true;
 	});
+
+	it('returns the priority', function () {
+		var config = {
+			fronts: {
+				one: {
+					priority: 'banana'
+				},
+				two: {}
+			},
+			collections: {}
+		};
+
+		var one = new Front('one', config),
+			two = new Front('two', config);
+
+		expect(one.priority()).to.equal('banana');
+		expect(two.priority()).to.equal('editorial');
+	});
 });
