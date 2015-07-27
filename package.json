@@ -1,7 +1,7 @@
 {
   "name": "aws-s3-facia-tool",
   "description": "Iterate on S3 buckets in facia tool",
-  "version": "0.4.4",
+  "version": "0.4.5",
   "main": "lib/facia-tool.js",
   "dependencies": {
     "async": "^1.2.1",
