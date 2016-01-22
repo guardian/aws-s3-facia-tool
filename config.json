@@ -5,6 +5,7 @@
     "configHistoryPrefix": "frontsapi/history/config",
     "collectionHistoryPrefix": "frontsapi/history/collection",
     "collectionsPrefix": "frontsapi/collection",
+    "pressedPrefix": "frontsapi/pressed/live",
     "maxParallelRequests": 6,
     "maxDaysHistory": 7
 }
