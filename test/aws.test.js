@@ -118,4 +118,39 @@ describe('aws', function () {
 		});
 	});
 
+	it('head object - error', function (done) {
+		aws.setS3({
+			headObject: function (obj, callback) {
+				callback(new Error('something wrong'));
+			}
+		});
+
+		aws.headObject({
+			Key: 'unit_test/head_object'
+		}, function (err) {
+			expect(err).to.be.an.instanceof(Error);
+			done();
+		});
+	});
+
+	it('head - works fine', function (done) {
+		aws.setS3({
+			headObject: function (obj, callback) {
+				callback(null, {
+					LastModified: 'long time ago'
+				});
+			}
+		});
+
+		aws.headObject({
+			Key: 'unit_test/head_object'
+		}, function (err, data) {
+			expect(err).to.be.null;
+			expect(data).to.deep.equal({
+				LastModified: 'long time ago'
+			});
+			done();
+		});
+	});
+
 });
