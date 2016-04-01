@@ -134,5 +134,7 @@ describe('collection', function () {
 		instance = new Collection('twotags', config);
 		expect(instance.hasMetadata('lucky')).to.equal(true);
 		expect(instance.hasMetadata('happy')).to.equal(true);
+		instance = new Collection('twotags', config);
+		expect(instance.hasMetadata('LUCKY')).to.equal(true);
 	});
 });

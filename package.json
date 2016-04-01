@@ -1,7 +1,7 @@
 {
   "name": "aws-s3-facia-tool",
   "description": "Iterate on S3 buckets in facia tool",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "main": "dist/bundle.js",
   "scripts": {
     "lint": "eslint lib",
