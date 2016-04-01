@@ -112,4 +112,27 @@ describe('collection', function () {
 		instance = new Collection('b', config);
 		expect(instance.isBackfilled()).to.equal(true);
 	});
+
+	it('knows if a collection has metadata', function () {
+		var config = {
+			fronts: { one: { collections: ['notag', 'emptytag', 'onetag', 'twotags'] }},
+			collections: {
+				notag: {},
+				emptytag: { metadata: [] },
+				onetag: { metadata: [{ type: 'lucky' }] },
+				twotags: { metadata: [{ type: 'lucky' }, { type: 'happy' }] }
+			}
+		};
+
+		var instance = new Collection('nonexisting', config);
+		expect(instance.hasMetadata('lucky')).to.equal(false);
+		instance = new Collection('notag', config);
+		expect(instance.hasMetadata('lucky')).to.equal(false);
+		instance = new Collection('onetag', config);
+		expect(instance.hasMetadata('lucky')).to.equal(true);
+		expect(instance.hasMetadata('happy')).to.equal(false);
+		instance = new Collection('twotags', config);
+		expect(instance.hasMetadata('lucky')).to.equal(true);
+		expect(instance.hasMetadata('happy')).to.equal(true);
+	});
 });
