@@ -4,7 +4,7 @@ Iterate on S3 bockets in facia tool
 
 ## Dependencies
 
-This package has a peer dependency on `aws-sdk` version `2.2x`.
+This package has a peer dependency on `aws-sdk` version `2.3.x`.
 
 ## Installation
 

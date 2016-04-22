@@ -1,4 +1,3 @@
-var Promise = require('es6-promise').Promise;
 var FaciaTool = require('./lib/facia-tool');
 var config = require('./config');
 var aws = require('./lib/aws');
