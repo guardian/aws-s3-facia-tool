@@ -1,10 +1,9 @@
-var expect = require('chai').expect;
-var moment = require('moment');
+import {expect} from 'chai';
+import moment from 'moment';
+import aws from '../lib/aws';
+import FaciaTool from '../lib/facia-tool';
 
 describe('facia-tool', function () {
-	var aws = require('../lib/aws');
-	var FaciaTool = require('../lib/facia-tool');
-
 	var tool;
 
 	beforeEach(function () {

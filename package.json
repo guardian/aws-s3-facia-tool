@@ -9,7 +9,7 @@
     "test": "babel-node ./node_modules/istanbul/lib/cli.js cover node_modules/mocha/bin/_mocha test",
     "posttest": "istanbul check-coverage --statements 85 --branches 70 --functions 100 --lines 90",
     "prepublish": "npm run bundle && npm test",
-    "watchTests": "nodemon mocha test -w --compilers js:babel-register",
+    "watchTests": "mocha test -w --compilers js:babel-register",
     "bundle": "rollup -c"
   },
   "publishConfig": {
