@@ -99,4 +99,28 @@ describe('config module', function () {
 			.to.eventually.deep.equal({ json: true });
 		});
 	});
+
+	describe('fetchAt', function () {
+		it('rejects if aws returns errors', function () {
+			return expect(Config(tool, {
+				getObject: (obj, cb) => {
+					expect(obj).to.deep.equal({
+						Bucket: 'test',
+						Key: 'AT/precise/location'
+					});
+					cb(new Error('aws error'));
+				}
+			}).fetchAt('AT/precise/location'))
+			.to.eventually.be.rejectedWith(Error, 'aws error');
+		});
+
+		it('resolves if aws is fine', function () {
+			return expect(Config(tool, {
+				getObject: (obj, cb) => {
+					cb(null, { result: 'aws' });
+				}
+			}).fetchAt('AT/precise/location'))
+			.to.eventually.be.an.instanceof(ConfigInstance);
+		});
+	});
 });

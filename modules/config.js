@@ -40,5 +40,17 @@ export default function (tool, aws) {
         return get().then(config => config.json);
     }
 
-    return {fetch, get, json, head};
+    function fetchAt (key) {
+        const options = tool.options;
+        return promise((cb) => {
+            aws.getObject({
+                Bucket: options.bucket,
+                Key: key
+            }, cb);
+        }).then(data => {
+            return new Config(data);
+        });
+    }
+
+    return {fetch, get, json, head, fetchAt};
 }
