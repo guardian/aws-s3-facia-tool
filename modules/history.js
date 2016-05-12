@@ -1,7 +1,7 @@
 import {parallel} from '../lib/series';
 import {datesBetween} from '../lib/since';
 import {getHistoryConfigPrefix, getHistoryCollectionPrefix} from '../lib/aws-keys';
-import {toListOfConfigChanges} from '../lib/aws-transforms';
+import {toListOfConfigChanges, toListOfCollectionChanges} from '../lib/aws-transforms';
 
 // To be deprecated maybe?
 import * as sinceUtil from '../lib/since';
@@ -11,7 +11,7 @@ import Collection from '../lib/collection';
 import ListCollections from '../lib/list-collection-history';
 
 export default function (tool, aws) {
-    function configList (since, to) {
+    function configList (since, to, filter) {
         if (!since || !to) {
             return Promise.reject(
                 new Error('Missing or invalid date interval parameters in history.configList')
@@ -27,10 +27,31 @@ export default function (tool, aws) {
                     Prefix: getHistoryConfigPrefix(date, tool.options)
                 }, (err, data) => callback(err, err ? null : toListOfConfigChanges(data)));
             }, maxParallel)
-            .then(list => {
-                // TODO filter the list at the two ends
-                return list;
-            });
+            .then(filter ? filter : list => list);
+        }
+    }
+
+    function collectionList (since, to, collectionId, filter) {
+        if (!since || !to) {
+            return Promise.reject(
+                new Error('Missing or invalid date interval parameters in history.collectionList')
+            );
+        } else if (!collectionId) {
+            return Promise.reject(
+                new Error('Missing collection ID in history.collectionList')
+            );
+        } else {
+            const maxParallel = tool.options.maxParallelRequests || 4;
+            const maxDaysHistory = tool.options.maxDaysHistory || 7;
+            const needed = datesBetween(since, to, maxDaysHistory);
+
+            return parallel(needed, (date, callback) => {
+                aws.listObjects({
+                    Bucket: tool.options.bucket,
+                    Prefix: getHistoryCollectionPrefix(collectionId, date, tool.options)
+                }, (err, data) => callback(err, err ? null : toListOfCollectionChanges(data)));
+            }, maxParallel)
+            .then(filter ? filter : list => list);
         }
     }
 
@@ -113,5 +134,5 @@ export default function (tool, aws) {
         });
     }
 
-    return {configList, config, collection};
+    return {configList, config, collection, collectionList};
 }
