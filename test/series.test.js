@@ -1,9 +1,8 @@
-/*jshint -W030 */
-var expect = require('chai').expect;
-var series = require('../lib/series');
+import {expect} from 'chai';
+import * as series from '../lib/series';
 
 describe('Series', function () {
-	it('runs in parallel successfully', function (done) {
+	it('runs in parallel successfully', function () {
 		var list = [1, 2, 3, 4, 5],
 			doAnAction = function (item, callback) {
 				setImmediate(function () {
@@ -11,9 +10,8 @@ describe('Series', function () {
 				});
 			};
 
-		series.parallel(list, doAnAction, 2)
-		.then(function (results) {
-			expect(results).to.deep.equal([{
+		return expect(series.parallel(list, doAnAction, 2))
+			.to.eventually.deep.equal([{
 				object: 1,
 				json: 2
 			}, {
@@ -29,13 +27,10 @@ describe('Series', function () {
 				object: 5,
 				json: 6
 			}]);
-
-			done();
-		});
 	});
 
-	it('runs in parallel failing at some point', function (done) {
-		var list = [1, 2, 3, 4, 5],
+	it('runs in parallel failing at some point', function () {
+		const list = [1, 2, 3, 4, 5],
 			doAnAction = function (item, callback) {
 				setImmediate(function () {
 					if (item === 3) {
@@ -46,11 +41,7 @@ describe('Series', function () {
 				});
 			};
 
-		series.parallel(list, doAnAction, 2)
-		.catch(function (err) {
-			expect(err.message).to.match(/wrong/);
-
-			done();
-		});
+		return expect(series.parallel(list, doAnAction, 2))
+			.to.eventually.be.rejectedWith(/wrong/);
 	});
 });
