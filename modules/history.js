@@ -91,7 +91,7 @@ export default function (tool, aws) {
         }
     }
 
-    function frontAt (id, time) {
+    function frontAt (id, time, onCollectionFail) {
         if (!id) {
             return Promise.reject(
                 new Error('Missing parameter \'id\' in history.frontAt')
@@ -111,7 +111,10 @@ export default function (tool, aws) {
                             front.setCollection(collectionId, collection);
                             callback(null);
                         })
-                        .catch(callback);
+                        .catch(onCollectionFail ?
+                            ex => onCollectionFail(collectionId, ex, callback) :
+                            callback
+                        );
                     }, maxParallel)
                     .then(() => front);
                 } else {

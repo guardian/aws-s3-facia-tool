@@ -132,6 +132,37 @@ describe('history at', function () {
             .to.eventually.be.rejectedWith(/invalid collection/i);
         });
 
+        it('calls collection callback on fail', function () {
+            const configJson = {
+                fronts: {
+                    some: { collections: ['one', 'two'] }
+                },
+                collections: { one: { something: true }, two: {} }
+            };
+            const history = History({
+                options,
+                history: {
+                    configAt: () => {
+                        return Promise.resolve(new Config(configJson));
+                    },
+                    collectionAt: id => {
+						if (id === 'one') {
+							const collection = new Collection(id, configJson);
+							return Promise.resolve(collection);
+						} else {
+							return Promise.reject(new Error('invalid collection'));
+						}
+                    }
+                }
+            });
+            const date = new Date(2016, 4, 10, 9, 30);
+            return expect(history.frontAt('some', date, (id, ex, cb) => {
+				expect(id).to.equal('two');
+				cb(null);
+			}))
+            .to.eventually.be.fulfilled;
+        });
+
         it('returns the front at that given time', function () {
             const configJson = {
                 fronts: {
