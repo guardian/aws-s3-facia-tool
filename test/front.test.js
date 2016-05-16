@@ -61,4 +61,50 @@ describe('Front', function () {
 		expect(one.priority()).to.equal('banana');
 		expect(two.priority()).to.equal('editorial');
 	});
+
+	it('fails in list of trails if collections are missing', function () {
+		const config = {
+			fronts: {
+				one: {
+					collections: ['first', 'second', 'third']
+				}
+			},
+			collections: {}
+		};
+		const front = new Front('one', config);
+		expect(() => front.trailIds('live')).to.throw(/missing collection content/i);
+	});
+
+	it('returns the list of trails', function () {
+		const config = {
+			fronts: {
+				one: {
+					collections: ['first', 'second', 'third']
+				}
+			},
+			collections: {}
+		};
+		const front = new Front('one', config);
+		const [first, second, third] = [
+			new Collection('first', config),
+			new Collection('second', config),
+			new Collection('third', config)
+		];
+		first.setContent({
+			live: [{ id: 'a' }], draft: [{ id: 'a' }, { id: 'b' }]
+		});
+		second.setContent({
+			live: [], draft: [{ id: 'c'}]
+		});
+		third.setContent({
+			live: [{ id: 'd' }, { id: 'a' }, { id: 'e' }], treats: [{ id: 'f' }]
+		});
+		front.setCollection('first', first);
+		front.setCollection('second', second);
+		front.setCollection('third', third);
+		expect(front.trailIds('live')).to.deep.equal(['a', 'd', 'e']);
+		expect(front.trailIds('draft')).to.deep.equal(['a', 'b', 'c']);
+		expect(front.trailIds('treats')).to.deep.equal(['f']);
+		expect(front.trailIds('what??')).to.deep.equal([]);
+	});
 });
