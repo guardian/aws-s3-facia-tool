@@ -1,10 +1,9 @@
-var expect = require('chai').expect;
-var moment = require('moment');
+import {expect} from 'chai';
+import moment from 'moment';
+import Front from '../lib/front';
+import Collection from '../lib/collection';
 
 describe('Front', function () {
-	var Front = require('../lib/front');
-	var Collection = require('../lib/collection');
-
 	it('computes the last modified date', function () {
 		var config = {
 			fronts: { something: {} },

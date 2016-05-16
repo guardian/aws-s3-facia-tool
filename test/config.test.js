@@ -1,11 +1,10 @@
-var expect = require('chai').expect;
-var json = require('./samples/config.json');
-var jsonFind = require('./samples/configFind.json');
-var _ = require('lodash');
+import {expect} from 'chai';
+import _ from 'lodash';
+import json from './samples/config.json';
+import jsonFind from './samples/configFind.json';
+import Config from '../lib/config';
 
 describe('config', function () {
-	var Config = require('../lib/config');
-
 	it('has a collection', function () {
 		var instance = new Config(json);
 

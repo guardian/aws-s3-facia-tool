@@ -1,8 +1,7 @@
-var expect = require('chai').expect;
+import {expect} from 'chai';
+import Collection from '../lib/collection';
 
 describe('collection', function () {
-	var Collection = require('../lib/collection');
-
 	it('iterates on articles', function () {
 		var instance = new Collection('collection_id', { collections: {} });
 		instance.setContent({
@@ -136,5 +135,43 @@ describe('collection', function () {
 		expect(instance.hasMetadata('happy')).to.equal(true);
 		instance = new Collection('twotags', config);
 		expect(instance.hasMetadata('LUCKY')).to.equal(true);
+	});
+
+	it('knows the collection layout and visible stories', function () {
+		var config = {
+			fronts: { one: { collections: ['type', 'notype', 'dynamic'] }},
+			collections: {
+				type: { type: 'fixed/large/slow-XIV' },
+				notype: {},
+				dynamic: { type: 'dynamic/slow' }
+			}
+		};
+
+		var instance = new Collection('type', config);
+		instance.setContent({
+			live: (new Array(20)).map(() => { return {}; })
+		});
+		expect(instance.layout()).to.equal('fixed/large/slow-XIV');
+		expect(instance.visibleStories('live')).to.deep.equal({
+			mobile: 6,
+			desktop: 14
+		});
+
+		instance = new Collection('notype', config);
+		instance.setContent({
+			live: (new Array(20)).map(() => { return {}; })
+		});
+		expect(instance.layout()).to.equal(undefined);
+		expect(instance.visibleStories('live')).to.equal(undefined);
+
+		instance = new Collection('dynamic', config);
+		instance.setContent({
+			live: [{ metadata: { group: '1' } }, {}, {}, {}, {}, {}, {}, {}]
+		});
+		expect(instance.layout()).to.equal('dynamic/slow');
+		expect(instance.visibleStories('live')).to.deep.equal({
+			mobile: 5,
+			desktop: 5
+		});
 	});
 });
