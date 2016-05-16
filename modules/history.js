@@ -63,7 +63,11 @@ export default function (tool, aws) {
             );
         } else {
             return findInHistory(time, getHistoryConfigPrefix, tool.options, aws)
-            .then(object => tool.config.fetchAt(object.Key));
+            .then(object => tool.config.fetchAt(object.Key))
+            .catch(ex => {
+                ex.message += ' while fetching the config';
+                return Promise.reject(ex);
+            });
         }
     }
 
@@ -79,7 +83,11 @@ export default function (tool, aws) {
         } else {
             const prefix = (date, options) => getHistoryCollectionPrefix(id, date, options);
             return findInHistory(time, prefix, tool.options, aws)
-            .then(object => tool.collection.fetchAt(id, object.Key));
+            .then(object => tool.collection.fetchAt(id, object.Key))
+            .catch(ex => {
+                ex.message += ' while fetching the collection \'' + id + '\'';
+                return Promise.reject(ex);
+            });
         }
     }
 
