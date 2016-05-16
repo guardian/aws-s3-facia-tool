@@ -2,6 +2,7 @@ import {parallel} from '../lib/series';
 import {datesBetween} from '../lib/since';
 import {getHistoryConfigPrefix, getHistoryCollectionPrefix} from '../lib/aws-keys';
 import {toListOfConfigChanges, toListOfCollectionChanges} from '../lib/aws-transforms';
+import findInHistory from '../lib/find-history';
 
 // To be deprecated maybe?
 import * as sinceUtil from '../lib/since';
@@ -52,6 +53,63 @@ export default function (tool, aws) {
                 }, (err, data) => callback(err, err ? null : toListOfCollectionChanges(data)));
             }, maxParallel)
             .then(filter ? filter : list => list);
+        }
+    }
+
+    function configAt (time) {
+        if (!time) {
+            return Promise.reject(
+                new Error('Missing parameter \'time\' in history.configAt')
+            );
+        } else {
+            return findInHistory(time, getHistoryConfigPrefix, tool.options, aws)
+            .then(object => tool.config.fetchAt(object.Key));
+        }
+    }
+
+    function collectionAt (id, time) {
+        if (!id) {
+            return Promise.reject(
+                new Error('Missing parameter \'id\' in history.collectionAt')
+            );
+        } else if (!time) {
+            return Promise.reject(
+                new Error('Missing parameter \'time\' in history.collectionAt')
+            );
+        } else {
+            const prefix = (date, options) => getHistoryCollectionPrefix(id, date, options);
+            return findInHistory(time, prefix, tool.options, aws)
+            .then(object => tool.collection.fetchAt(id, object.Key));
+        }
+    }
+
+    function frontAt (id, time) {
+        if (!id) {
+            return Promise.reject(
+                new Error('Missing parameter \'id\' in history.frontAt')
+            );
+        } else if (!time) {
+            return Promise.reject(
+                new Error('Missing parameter \'time\' in history.frontAt')
+            );
+        } else {
+            return tool.history.configAt(time).then(config => {
+                if (config.hasFront(id)) {
+                    const front = config.front(id);
+                    const maxParallel = tool.options.maxParallelRequests || 4;
+                    return parallel(front.allCollections(), (collectionId, callback) => {
+                        tool.history.collectionAt(collectionId, time)
+                        .then(collection => {
+                            front.setCollection(collectionId, collection);
+                            callback(null);
+                        })
+                        .catch(callback);
+                    }, maxParallel)
+                    .then(() => front);
+                } else {
+                    return Promise.reject(new Error('Front \'' + id + '\' did not exists at the specified time.'));
+                }
+            });
         }
     }
 
@@ -134,5 +192,5 @@ export default function (tool, aws) {
         });
     }
 
-    return {configList, config, collection, collectionList};
+    return {configList, config, collection, collectionList, configAt, collectionAt, frontAt};
 }
