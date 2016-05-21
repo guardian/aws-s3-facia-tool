@@ -174,4 +174,33 @@ describe('collection', function () {
 			desktop: 5
 		});
 	});
+
+	it('lists the trails', function () {
+		const config = {
+			fronts: {
+				one: {
+					collections: ['first', 'second']
+				}
+			},
+			collections: {}
+		};
+		const [first, second] = [
+			new Collection('first', config),
+			new Collection('second', config)
+		];
+		first.setContent({
+			live: [{ id: 'a' }], draft: [{ id: 'a' }, { id: 'b' }]
+		});
+		second.setContent({
+			live: [{ id: 'd' }, { id: 'a' }, { id: 'e' }], treats: [{ id: 'f' }]
+		});
+
+		expect(first.trails('live')).to.deep.equal([{ id: 'a' }]);
+		expect(first.trails('draft')).to.deep.equal([{ id: 'a' }, { id: 'b' }]);
+		expect(first.trails('treats')).to.deep.equal([]);
+		expect(second.trails('live')).to.deep.equal([{ id: 'd' }, { id: 'a' }, { id: 'e' }]);
+		expect(second.trails('draft')).to.deep.equal([]);
+		expect(second.trails('treats')).to.deep.equal([{ id: 'f' }]);
+		expect(second.trails('what???')).to.deep.equal([]);
+	});
 });
