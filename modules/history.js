@@ -71,7 +71,7 @@ export default function (tool, aws) {
         }
     }
 
-    function collectionAt (id, time) {
+    function collectionAt (id, time, config = {}) {
         if (!id) {
             return Promise.reject(
                 new Error('Missing parameter \'id\' in history.collectionAt')
@@ -83,7 +83,7 @@ export default function (tool, aws) {
         } else {
             const prefix = (date, options) => getHistoryCollectionPrefix(id, date, options);
             return findInHistory(time, prefix, tool.options, aws)
-            .then(object => tool.collection.fetchAt(id, object.Key))
+            .then(object => tool.collection.fetchAt(id, object.Key, config))
             .catch(ex => {
                 ex.message += ' while fetching the collection \'' + id + '\'';
                 return Promise.reject(ex);
@@ -106,7 +106,7 @@ export default function (tool, aws) {
                     const front = config.front(id);
                     const maxParallel = tool.options.maxParallelRequests || 4;
                     return parallel(front.allCollections(), (collectionId, callback) => {
-                        tool.history.collectionAt(collectionId, time)
+                        tool.history.collectionAt(collectionId, time, config)
                         .then(collection => {
                             front.setCollection(collectionId, collection);
                             callback(null);
