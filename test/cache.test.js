@@ -1,12 +1,11 @@
-var expect = require('chai').expect;
+import {expect} from 'chai';
+import cache from '../lib/cache';
 
 describe('cache', function () {
-	var cache = require('../lib/cache');
-
 	it('disabled', function () {
 		cache.cacheEnabled = false;
 
-		var instance = cache.key('unit_test/something');
+		const instance = cache.key('unit_test/something');
 		instance.store('text');
 		expect(instance.get()).to.be.undefined;
 	});
@@ -14,8 +13,15 @@ describe('cache', function () {
 	it('enabled', function () {
 		cache.cacheEnabled = true;
 
-		var instance = cache.key('unit_test/something');
+		const instance = cache.key('unit_test/something');
 		instance.store('{"one": 1}');
 		expect(instance.get()).to.deep.equal({ one: 1 });
+	});
+
+	it('enabled cache miss', function () {
+		cache.cacheEnabled = true;
+
+		const instance = cache.key('unit_test/cache_miss');
+		expect(instance.get()).to.be.undefined;
 	});
 });

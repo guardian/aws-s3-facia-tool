@@ -1,8 +1,8 @@
-/*jshint -W030 */
-var expect = require('chai').expect;
+import {expect} from 'chai';
+import cache from '../lib/cache';
+import aws from '../lib/aws';
 
 describe('aws', function () {
-	var aws = require('../lib/aws');
 
 	beforeEach(function () {
 		aws.setCache(false);
@@ -153,4 +153,66 @@ describe('aws', function () {
 		});
 	});
 
+	it('get an object - cache', function (done) {
+		aws.setCache(true);
+		const instance = cache.key('aws_test/1');
+		instance.store('{ "any" : true }');
+		aws.setS3({
+			getObject () {
+				throw new Error('Should not call S3');
+			}
+		});
+
+		aws.getObject({
+			Key: 'aws_test/1'
+		}, function (err, data) {
+			expect(err).to.be.null;
+			expect(data).to.deep.equal({
+				any: true
+			});
+			done();
+		});
+	});
+
+	it('head an object - cache', function (done) {
+		aws.setCache(true);
+		const instance = cache.key('aws_test/2');
+		instance.store('{ "any" : false }');
+		aws.setS3({
+			headObject () {
+				throw new Error('Should not call S3');
+			}
+		});
+
+		aws.headObject({
+			Key: 'aws_test/2'
+		}, function (err, data) {
+			expect(err).to.be.null;
+			expect(data).to.deep.equal({
+				any: false
+			});
+			done();
+		});
+	});
+
+	it('list objects - cache', function (done) {
+		aws.setCache(true);
+		const instance = cache.key('aws_test/3');
+		instance.store(JSON.stringify([{ num: 1}]));
+		aws.setS3({
+			listObjects () {
+				throw new Error('Should not call S3');
+			}
+		});
+
+		aws.listObjects({
+			Prefix: 'aws_test/3'
+		}, function (err, data) {
+			expect(err).to.be.null;
+			expect(data).to.deep.equal([
+				{ num: 1 }
+			]);
+			done();
+		});
+	});
 });

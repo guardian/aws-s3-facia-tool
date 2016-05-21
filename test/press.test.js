@@ -8,9 +8,8 @@ describe('press', function () {
 
 	beforeEach(function () {
 		tool = new FaciaTool({
-			collectionsPrefix: 'collection',
-			env: 'TEST',
-			configKey: 'please_config.json'
+			pressedPrefix: 'pressed',
+			env: 'TEST'
 		});
 		aws.setCache(false);
 	});
@@ -52,13 +51,30 @@ describe('press', function () {
 	it('get last modified - pressed front', function (done) {
 		aws.setS3({
 			headObject: function (obj, callback) {
+				expect(obj.Key).to.equal('TEST/pressed/live/front-id/fapi/pressed.json');
 				callback(null, {
 					LastModified: moment('2016-02-01 12:34:56').format()
 				});
 			}
 		});
 
-		return tool.press.getLastModified().then(function (when) {
+		return tool.press.getLastModified('front-id').then(function (when) {
+			expect(when).to.equal('2016-02-01T12:34:56+00:00');
+			done();
+		});
+	});
+
+	it('get last modified - pressed front in draft', function (done) {
+		aws.setS3({
+			headObject: function (obj, callback) {
+				expect(obj.Key).to.equal('TEST/pressed/draft/front-id/fapi/pressed.json');
+				callback(null, {
+					LastModified: moment('2016-02-01 12:34:56').format()
+				});
+			}
+		});
+
+		return tool.press.getLastModified('front-id' ,'draft').then(function (when) {
 			expect(when).to.equal('2016-02-01T12:34:56+00:00');
 			done();
 		});
