@@ -1,10 +1,10 @@
 import {expect} from 'chai';
 import moment from 'moment';
-import aws from '../lib/aws';
 import FaciaTool from '../lib/facia-tool';
 
 describe('facia-tool', function () {
-	var tool;
+	let tool;
+	let aws;
 
 	beforeEach(function () {
 		tool = new FaciaTool({
@@ -12,6 +12,7 @@ describe('facia-tool', function () {
 			env: 'TEST',
 			configKey: 'please_config.json'
 		});
+		aws = tool.AWS;
 		aws.setCache(false);
 	});
 
@@ -50,7 +51,7 @@ describe('facia-tool', function () {
 
 	it('lists collections', function () {
 		aws.setS3({
-			listObjects: function (obj, callback) {
+			listObjectsV2: function (obj, callback) {
 				callback(null, {
 					Contents: [
 						{ Key: 'some-key' },
@@ -70,7 +71,7 @@ describe('facia-tool', function () {
 
 	it('lists collections - fail', function (done) {
 		aws.setS3({
-			listObjects: function (obj, callback) {
+			listObjectsV2: function (obj, callback) {
 				callback(new Error('nope'));
 			}
 		});
@@ -83,7 +84,7 @@ describe('facia-tool', function () {
 
 	it('fetch collections', function () {
 		aws.setS3({
-			listObjects: function (obj, callback) {
+			listObjectsV2: function (obj, callback) {
 				callback(null, {
 					Contents: [
 						{ Key: 'TEST/collection/one/collection.json' }
@@ -119,7 +120,7 @@ describe('facia-tool', function () {
 
 	it('fetch collections - fail', function (done) {
 		aws.setS3({
-			listObjects: function (obj, callback) {
+			listObjectsV2: function (obj, callback) {
 				callback(null, {
 					Contents: [
 						{ Key: 'TEST/collection/one/collection.json' }
@@ -323,7 +324,7 @@ describe('facia-tool', function () {
 
 	it('find collections', function () {
 		aws.setS3({
-			listObjects: function (obj, callback) {
+			listObjectsV2: function (obj, callback) {
 				callback(null, {
 					Contents: [
 						{ Key: 'TEST/history/2015-03-22T15:00:00.000Z.someone.here@guardian.co.uk.json' },
@@ -368,7 +369,7 @@ describe('facia-tool', function () {
 
 	it('find all collections', function () {
 		aws.setS3({
-			listObjects: function (obj, callback) {
+			listObjectsV2: function (obj, callback) {
 				callback(null, {
 					Contents: [
 						{ Key: 'TEST/history/2015-03-22T15:00:00.000Z.someone.here@guardian.co.uk.json' },

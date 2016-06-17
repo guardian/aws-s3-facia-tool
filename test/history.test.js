@@ -1,10 +1,10 @@
 import {expect} from 'chai';
 import moment from 'moment';
-import aws from '../lib/aws';
 import FaciaTool from '../lib/facia-tool';
 
 describe('facia-tool history', function () {
-	var tool;
+	let tool;
+	let aws;
 
 	beforeEach(function () {
 		tool = new FaciaTool({
@@ -14,6 +14,7 @@ describe('facia-tool history', function () {
 			configKey: 'please_config.json',
 			maxDaysHistory: 4
 		});
+		aws = tool.AWS;
 		aws.setCache(false);
 	});
 
@@ -24,7 +25,7 @@ describe('facia-tool history', function () {
 
 	it('config', function () {
 		aws.setS3({
-			listObjects: function (obj, callback) {
+			listObjectsV2: function (obj, callback) {
 				callback(null, {
 					Contents: [
 						{ Key: 'TEST/history/2015-03-22T15:00:00.000Z.someone.here@guardian.co.uk.json' },
@@ -66,7 +67,7 @@ describe('facia-tool history', function () {
 
 	it('config - fail on list', function (done) {
 		aws.setS3({
-			listObjects: function (obj, callback) {
+			listObjectsV2: function (obj, callback) {
 				callback(new Error('nope'));
 			}
 		});
@@ -79,7 +80,7 @@ describe('facia-tool history', function () {
 
 	it('config - fail on bucket', function (done) {
 		aws.setS3({
-			listObjects: function (obj, callback) {
+			listObjectsV2: function (obj, callback) {
 				callback(null, {
 					Contents: [
 						{ Key: 'TEST/history/2015-03-22T15:00:00.000Z.someone.here@guardian.co.uk.json' }
@@ -100,7 +101,7 @@ describe('facia-tool history', function () {
 
 	it('collection - today', function () {
 		aws.setS3({
-			listObjects: function (obj, callback) {
+			listObjectsV2: function (obj, callback) {
 				if (obj.Prefix.indexOf(moment().format('YYYY/MM/DD')) > -1) {
 					callback(null, {
 						Contents: [
@@ -145,7 +146,7 @@ describe('facia-tool history', function () {
 
 	it('collection - since', function () {
 		aws.setS3({
-			listObjects: function (obj, callback) {
+			listObjectsV2: function (obj, callback) {
 				if (obj.Prefix.indexOf(moment().format('YYYY/MM/DD')) > -1) {
 					callback(null, {
 						Contents: [
