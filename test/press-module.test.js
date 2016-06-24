@@ -88,12 +88,12 @@ describe('press', function () {
 			listObjectVersions (obj, callback) {
 				expect(obj.Prefix).to.equal('TEST/pressed/live/front-id/fapi/pressed.json');
 				callback(null, [{
-					LastModified: moment('2016-05-01 12:00:00').format(),
+					LastModified: moment('2016-05-01 12:00:00+01:00').format(),
 					VersionId: '1',
 					ETag: 'abc',
 					IsLatest: false
 				}, {
-					LastModified: moment('2016-05-05 16:00:00').format(),
+					LastModified: moment('2016-05-05 16:00:00+01:00').format(),
 					VersionId: '2',
 					ETag: 'cde',
 					IsLatest: true
@@ -105,12 +105,12 @@ describe('press', function () {
 		return expect(press.listVersions('front-id', 'live'))
 			.to.eventually.deep.equal([{
 				id: '1',
-				lastModified: '2016-05-01T12:00:00+01:00',
+				lastModified: new Date('2016-05-01T12:00:00+01:00'),
 				etag: 'abc',
 				isLatest: false
 			}, {
 				id: '2',
-				lastModified: '2016-05-05T16:00:00+01:00',
+				lastModified: new Date('2016-05-05T16:00:00+01:00'),
 				etag: 'cde',
 				isLatest: true
 			}]);

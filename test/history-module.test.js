@@ -55,7 +55,7 @@ describe('history module', function () {
 					calls.push(obj.Prefix);
 					cb(null, [{
 						Key: 'test-key-' + obj.Prefix.substr(-3, 2),
-						LastModified: 'never',
+						LastModified: since.toString(),
 						ETag: 'test-tag'
 					}]);
 				}
@@ -66,14 +66,14 @@ describe('history module', function () {
 				.to.eventually.deep.equal([{
 					json: [{
 						key: 'test-key-31',
-						lastModified: 'never',
+						lastModified: since,
 						etag: 'test-tag'
 					}],
 					object: '2016/01/31'
 				}, {
 					json: [{
 						key: 'test-key-01',
-						lastModified: 'never',
+						lastModified: since,
 						etag: 'test-tag'
 					}],
 					object: '2016/02/01'
@@ -107,7 +107,7 @@ describe('history module', function () {
 				.to.eventually.deep.equal([{
 					json: [{
 						key: 'test-key-1',
-						lastModified: (new Date(2016, 0, 31, 10, 0)).toISOString(),
+						lastModified: new Date(2016, 0, 31, 10, 0),
 						etag: 'test-tag'
 					}],
 					object: '2016/01/31'
@@ -179,11 +179,11 @@ describe('history module', function () {
 				.to.eventually.deep.equal([{
 					json: [{
 						key: 'test-key-1',
-						lastModified: (new Date(2016, 0, 31, 6, 30)).toISOString(),
+						lastModified: new Date(2016, 0, 31, 6, 30),
 						etag: 'test-tag'
 					}, {
 						key: 'test-key-2',
-						lastModified: (new Date(2016, 0, 31, 8, 0)).toISOString(),
+						lastModified: new Date(2016, 0, 31, 8, 0),
 						etag: 'test-tag'
 					}],
 					object: '2016/01/31'
@@ -220,11 +220,11 @@ describe('history module', function () {
 				.to.eventually.deep.equal([{
 					json: [{
 						key: 'test-key-2',
-						lastModified: (new Date(2016, 0, 31, 8, 0)).toISOString(),
+						lastModified: new Date(2016, 0, 31, 8, 0),
 						etag: 'test-tag'
 					}, {
 						key: 'test-key-3',
-						lastModified: (new Date(2016, 0, 31, 10, 0)).toISOString(),
+						lastModified: new Date(2016, 0, 31, 10, 0),
 						etag: 'test-tag'
 					}],
 					object: '2016/01/31'
@@ -273,21 +273,21 @@ describe('history module', function () {
 				.to.eventually.deep.equal([{
 					json: [{
 						key: 'test-key-2',
-						lastModified: (new Date(2016, 0, 31, 8, 0)).toISOString(),
+						lastModified: new Date(2016, 0, 31, 8, 0),
 						etag: 'test-tag'
 					}],
 					object: '2016/01/31'
 				}, {
 					json: [{
 						key: 'test-key-3',
-						lastModified: (new Date(2016, 1, 1, 12, 0)).toISOString(),
+						lastModified: new Date(2016, 1, 1, 12, 0),
 						etag: 'test-tag'
 					}],
 					object: '2016/02/01'
 				}, {
 					json: [{
 						key: 'test-key-4',
-						lastModified: (new Date(2016, 1, 2, 10, 0)).toISOString(),
+						lastModified: new Date(2016, 1, 2, 10, 0),
 						etag: 'test-tag'
 					}],
 					object: '2016/02/02'
@@ -334,18 +334,18 @@ describe('history module', function () {
 				.to.eventually.deep.equal([{
 					json: [{
 						key: 'test-key-2',
-						lastModified: (new Date(2016, 0, 31, 6, 30)).toISOString(),
+						lastModified: new Date(2016, 0, 31, 6, 30),
 						etag: 'test-tag'
 					}, {
 						key: 'test-key-3',
-						lastModified: (new Date(2016, 0, 31, 8, 0)).toISOString(),
+						lastModified: new Date(2016, 0, 31, 8, 0),
 						etag: 'test-tag'
 					}],
 					object: '2016/01/31'
 				}, {
 					json: [{
 						key: 'test-key-4',
-						lastModified: (new Date(2016, 1, 1, 10, 0)).toISOString(),
+						lastModified: new Date(2016, 1, 1, 10, 0),
 						etag: 'test-tag'
 					}],
 					object: '2016/02/01'
