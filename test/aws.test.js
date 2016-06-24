@@ -1,8 +1,10 @@
 import {expect} from 'chai';
 import * as cache from '../lib/cache';
-import * as aws from '../lib/aws';
+import defaultAws from '../lib/aws';
 
 describe('aws', function () {
+	let aws = defaultAws();
+
 	afterEach(function () {
 		var AWS = require('aws-sdk');
 		aws.setS3(new AWS.S3());
@@ -307,6 +309,29 @@ describe('aws', function () {
 				expect(data).to.deep.equal([
 					{ num: 2 }
 				]);
+				done();
+			});
+		});
+	});
+
+	describe('multiple instances', function () {
+		it('setting the object does not impact the first', function (done) {
+			const first = defaultAws();
+			const second = defaultAws({
+				credentialsProvider: {}
+			});
+			first.setS3({
+				getObject (obj, cb) {
+					cb(null, { Body: '{}' });
+				}
+			});
+			second.setS3({
+				getObject (obj, cb) {
+					cb(new Error('should not call this'));
+				}
+			});
+			first.getObject({ Key: 'any' }, err => {
+				expect(err).to.be.null;
 				done();
 			});
 		});
