@@ -1,20 +1,20 @@
 import {expect} from 'chai';
 import moment from 'moment';
-import FaciaTool from '../lib/facia-tool';
+import {Client, History} from '../lib/index';
 
 describe('facia-tool history', function () {
-	let tool;
+	let client;
 	let aws;
 
 	beforeEach(function () {
-		tool = new FaciaTool({
+		client = new Client({
 			collectionsPrefix: 'collection',
 			collectionHistoryPrefix: 'history',
 			env: 'TEST',
 			configKey: 'please_config.json',
 			maxDaysHistory: 4
 		});
-		aws = tool.AWS;
+		aws = client.AWS;
 		aws.setCache(false);
 	});
 
@@ -54,7 +54,7 @@ describe('facia-tool history', function () {
 			}
 		});
 
-		return tool.history.config().then(function (list) {
+		return History(client).config().then(function (list) {
 			expect(list.length).to.equal(3);
 			expect(list.all[2].author).to.equal('someone.here@guardian.co.uk');
 			expect(list.all[2].config.hasCollection('one')).to.equal(true);
@@ -72,7 +72,7 @@ describe('facia-tool history', function () {
 			}
 		});
 
-		tool.history.config().catch(function (err) {
+		History(client).config().catch(function (err) {
 			expect(err).to.be.instanceof(Error);
 			done();
 		});
@@ -93,7 +93,7 @@ describe('facia-tool history', function () {
 			}
 		});
 
-		tool.history.config().catch(function (err) {
+		History(client).config().catch(function (err) {
 			expect(err).to.be.instanceof(Error);
 			done();
 		});
@@ -107,11 +107,11 @@ describe('facia-tool history', function () {
 						Contents: [
 							{
 								Key: 'TEST/history/2015/03/22/a-collection/2015-03-22T15:00:00.000Z.someone.here@guardian.co.uk.json',
-								LastModified: moment().subtract(20, 'days')
+								LastModified: moment().subtract(20, 'days').toDate()
 							},
 							{
 								Key: 'TEST/history/2015/03/24/a-collection/2015-03-24T16:00:00.000Z.another.name@guardian.co.uk.json',
-								LastModified: moment()
+								LastModified: new Date()
 							}
 						],
 						IsTruncated: false
@@ -139,7 +139,7 @@ describe('facia-tool history', function () {
 			}
 		});
 
-		return tool.history.collection('a-collection').then(function (list) {
+		return History(client).collection('a-collection').then(function (list) {
 			expect(list.length).to.equal(2);
 		});
 	});
@@ -152,11 +152,11 @@ describe('facia-tool history', function () {
 						Contents: [
 							{
 								Key: 'TEST/history/2015/03/22/a-collection/2015-03-22T15:00:00.000Z.someone.here@guardian.co.uk.json',
-								LastModified: moment()
+								LastModified: new Date()
 							},
 							{
 								Key: 'TEST/history/2015/03/24/a-collection/2015-03-24T16:00:00.000Z.another.name@guardian.co.uk.json',
-								LastModified: moment().subtract(2, 'days')
+								LastModified: moment().subtract(2, 'days').toDate()
 							}
 						],
 						IsTruncated: false
@@ -166,7 +166,7 @@ describe('facia-tool history', function () {
 						Contents: [
 							{
 								Key: 'TEST/history/2015/03/26/a-collection/2015-03-26T16:00:00.000Z.another.name@guardian.co.uk.json',
-								LastModified: moment().subtract(4, 'hours')
+								LastModified: moment().subtract(4, 'hours').toDate()
 							}
 						],
 						IsTruncated: false
@@ -200,13 +200,13 @@ describe('facia-tool history', function () {
 			}
 		});
 
-		return tool.history.collection('a-collection', moment().subtract(24, 'hours')).then(function (list) {
+		return History(client).collection('a-collection', moment().subtract(24, 'hours').toDate()).then(function (list) {
 			expect(list.length).to.equal(2);
 		});
 	});
 
 	it('collection - fail missing id', function () {
-		return tool.history.collection().catch(function (error) {
+		return History(client).collection().catch(function (error) {
 			expect(error.message).to.match(/missing collection/i);
 		});
 	});

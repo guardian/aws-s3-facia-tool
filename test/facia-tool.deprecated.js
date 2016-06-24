@@ -1,6 +1,6 @@
-import {expect} from 'chai';
-import moment from 'moment';
-import FaciaTool from '../lib/facia-tool';
+const expect = require('chai').expect;
+var moment = require('moment');
+var FaciaTool = require('../lib/facia-tool').default;
 
 describe('facia-tool', function () {
 	let tool;
@@ -19,129 +19,6 @@ describe('facia-tool', function () {
 	afterEach(function () {
 		var AWS = require('aws-sdk');
 		aws.setS3(new AWS.S3());
-	});
-
-	it('fetches the config', function (done) {
-		aws.setS3({
-			getObject: function (obj, callback) {
-				callback(null, {
-					Body: '{"collections": {"one": {}}}'
-				});
-			}
-		});
-
-		tool.fetchConfig().then(function (config) {
-			expect(config.hasCollection('one')).to.equal(true);
-			done();
-		});
-	});
-
-	it('fetches the config - fail', function (done) {
-		aws.setS3({
-			getObject: function (obj, callback) {
-				callback(new Error('nope'));
-			}
-		});
-
-		tool.fetchConfig().catch(function (err) {
-			expect(err).to.be.instanceof(Error);
-			done();
-		});
-	});
-
-	it('lists collections', function () {
-		aws.setS3({
-			listObjectsV2: function (obj, callback) {
-				callback(null, {
-					Contents: [
-						{ Key: 'some-key' },
-						{ Key: 'TEST/collection/one/collection.json' },
-						{ Key: 'TEST/collection/two/collection.json' },
-						{ Key: 'TEST/collection/three/collection.json' }
-					],
-					IsTruncated: false
-				});
-			}
-		});
-
-		return tool.listCollections().then(function (list) {
-			expect(list.toString()).to.equal('one, two, three');
-		});
-	});
-
-	it('lists collections - fail', function (done) {
-		aws.setS3({
-			listObjectsV2: function (obj, callback) {
-				callback(new Error('nope'));
-			}
-		});
-
-		tool.listCollections().catch(function (err) {
-			expect(err).to.be.instanceof(Error);
-			done();
-		});
-	});
-
-	it('fetch collections', function () {
-		aws.setS3({
-			listObjectsV2: function (obj, callback) {
-				callback(null, {
-					Contents: [
-						{ Key: 'TEST/collection/one/collection.json' }
-					],
-					IsTruncated: false
-				});
-			}
-		});
-
-		return tool.listCollections().then(function (list) {
-			aws.setS3({
-				getObject: function (obj, callback) {
-					callback(null, {
-						Body: '{"live": [{ "id": "one" }]}'
-					});
-				}
-			});
-
-			return tool.fetchCollections(list).then(function (collections) {
-				expect(collections.length).to.equal(1);
-				var iterate = {};
-				collections[0].eachArticle(function (container, article) {
-					iterate[container + '__' + article.id] = article;
-				});
-				expect(iterate).to.deep.equal({
-					'live__one': {
-						id: 'one'
-					}
-				});
-			});
-		});
-	});
-
-	it('fetch collections - fail', function (done) {
-		aws.setS3({
-			listObjectsV2: function (obj, callback) {
-				callback(null, {
-					Contents: [
-						{ Key: 'TEST/collection/one/collection.json' }
-					],
-					IsTruncated: false
-				});
-			}
-		});
-
-		return tool.listCollections().then(function () {
-			aws.setS3({
-				getObject: function (obj, callback) {
-					callback(new Error('nope'));
-				}
-			});
-
-			return tool.fetchCollections().catch(function (err) {
-				expect(err).to.be.instanceof(Error);
-				done();
-			});
-		});
 	});
 
 	it('fetch collection', function () {
@@ -174,151 +51,6 @@ describe('facia-tool', function () {
 		tool.fetchCollection('non_existing').catch(function (err) {
 			expect(err).to.be.instanceof(Error);
 			done();
-		});
-	});
-
-	it('front', function () {
-		aws.setS3({
-			getObject: function (obj, callback) {
-				if (obj.Key.indexOf('one') > -1) {
-					callback(null, {
-						Body: JSON.stringify({
-							live: [{ id: 'one' }]
-						})
-					});
-				} else if (obj.Key.indexOf('two') > -1) {
-					callback(new Error('never pressed'));
-				} else if (obj.Key.indexOf('please_config') > -1) {
-					callback(null, {
-						Body: JSON.stringify({
-							collections: { one: { anything: 'here' }, two: {} },
-							fronts: { uk: { collections: ['one', 'two'] } }
-						})
-					});
-				} else {
-					callback(new Error('nope'));
-				}
-			}
-		});
-
-		return tool.front('uk').then(function (front) {
-			expect(front.toJSON()).to.deep.equal({
-				_id: 'uk',
-				config: { collections: ['one', 'two'] },
-				collections: [{
-					_id: 'one',
-					anything: 'here'
-				}, {
-					_id: 'two'
-				}],
-				collectionsFull: {
-					one: {
-						_id: 'one',
-						config: {
-							_id: 'one',
-							anything: 'here'
-						},
-						collection: {
-							live: [{ id: 'one' }]
-						}
-					},
-					two: {
-						_id: 'two',
-						config: {
-							_id: 'two'
-						},
-						collection: null
-					}
-				}
-			});
-
-			expect(front.collection('one').toJSON()).to.deep.equal({
-				_id: 'one',
-				config: {
-					_id: 'one',
-					anything: 'here'
-				},
-				collection: {
-					live: [{ id: 'one' }]
-				}
-			});
-		});
-	});
-
-	it('front - doesn\'t exist', function () {
-		aws.setS3({
-			getObject: function (obj, callback) {
-				callback(null, {
-					Body: JSON.stringify({
-						collections: { one: {}, two: {} },
-						fronts: { uk: { collections: ['one', 'two'] } }
-					})
-				});
-			}
-		});
-
-		return tool.front('au/missing/front').catch(function (error) {
-			expect(error.message).to.match(/Unable to find/i);
-		});
-	});
-
-	it('front with uneditable collections', function () {
-		aws.setS3({
-			getObject: function (obj, callback) {
-				if (obj.Key.indexOf('one') > -1) {
-					throw new Error('collection one shouldn\'t be fetched');
-				} else if (obj.Key.indexOf('two') > -1) {
-					callback(new Error('never pressed'));
-				} else if (obj.Key.indexOf('please_config') > -1) {
-					callback(null, {
-						Body: JSON.stringify({
-							collections: { one: { uneditable: true }, two: {} },
-							fronts: { uk: { collections: ['one', 'two'] } }
-						})
-					});
-				} else {
-					callback(new Error('nope'));
-				}
-			}
-		});
-
-		return tool.front('uk').then(function (front) {
-			expect(front.toJSON()).to.deep.equal({
-				_id: 'uk',
-				config: { collections: ['one', 'two'] },
-				collections: [{
-					_id: 'one',
-					uneditable: true
-				}, {
-					_id: 'two'
-				}],
-				collectionsFull: {
-					one: {
-						_id: 'one',
-						config: {
-							_id: 'one',
-							uneditable: true
-						},
-						collection: null
-					},
-					two: {
-						_id: 'two',
-						config: {
-							_id: 'two'
-						},
-						collection: null
-					}
-				}
-			});
-
-			expect(front.collection('one').toJSON()).to.deep.equal({
-				_id: 'one',
-				config: {
-					_id: 'one',
-					uneditable: true
-				},
-				collection: null
-			});
 		});
 	});
 
@@ -451,10 +183,10 @@ describe('facia-tool', function () {
 
 			expect(us.id).to.equal('us');
 			expect(uk.id).to.equal('uk');
-			expect(us.allCollections()).to.deep.equal(['two']);
-			expect(uk.allCollections()).to.deep.equal(['one', 'two']);
+			expect(us.listCollectionsIds()).to.deep.equal(['two']);
+			expect(uk.listCollectionsIds()).to.deep.equal(['one', 'two']);
 			expect(us.lastUpdated()).to.be.null;
-			expect(uk.lastUpdated().isSame(moment('2015-07-01', 'YYYY-MM-DD'), 'days')).to.be.true;
+			expect(moment(uk.lastUpdated()).isSame(moment('2015-07-01', 'YYYY-MM-DD'), 'days')).to.be.true;
 		});
 	});
 
@@ -495,7 +227,7 @@ describe('facia-tool', function () {
 			var us = fronts[0];
 
 			expect(us.id).to.equal('us');
-			expect(us.allCollections()).to.deep.equal(['two']);
+			expect(us.listCollectionsIds()).to.deep.equal(['two']);
 		});
 	});
 
@@ -522,7 +254,7 @@ describe('facia-tool', function () {
 			var us = fronts[0];
 
 			expect(us.id).to.equal('us');
-			expect(us.allCollections()).to.deep.equal(['one']);
+			expect(us.listCollectionsIds()).to.deep.equal(['one']);
 		});
 	});
 });

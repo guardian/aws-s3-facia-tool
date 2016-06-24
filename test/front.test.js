@@ -22,26 +22,26 @@ describe('Front', function () {
 			// never updated
 		});
 		two.setContent({
-			lastUpdated: moment('25-06-2015', 'DD-MM-YYYY')
+			lastUpdated: moment('25-06-2015', 'DD-MM-YYYY').valueOf()
 		});
 		three.setContent({
-			lastUpdated: moment('12-05-2015', 'DD-MM-YYYY')
+			lastUpdated: moment('12-05-2015', 'DD-MM-YYYY').valueOf()
 		});
 		four.setContent({
-			lastUpdated: moment('01-07-2015', 'DD-MM-YYYY')
+			lastUpdated: moment('01-07-2015', 'DD-MM-YYYY').valueOf()
 		});
 
 		front.setCollection('one', one);
 		expect(front.lastUpdated()).to.equal(null);
 
 		front.setCollection('two', two);
-		expect(front.lastUpdated().isSame(moment('25-06-2015', 'DD-MM-YYYY'), 'day')).to.be.true;
+		expect(moment(front.lastUpdated()).isSame(moment('25-06-2015', 'DD-MM-YYYY'), 'day')).to.be.true;
 
 		front.setCollection('three', three);
-		expect(front.lastUpdated().isSame(moment('25-06-2015', 'DD-MM-YYYY'), 'day')).to.be.true;
+		expect(moment(front.lastUpdated()).isSame(moment('25-06-2015', 'DD-MM-YYYY'), 'day')).to.be.true;
 
 		front.setCollection('four', four);
-		expect(front.lastUpdated().isSame(moment('01-07-2015', 'DD-MM-YYYY'), 'day')).to.be.true;
+		expect(moment(front.lastUpdated()).isSame(moment('01-07-2015', 'DD-MM-YYYY'), 'day')).to.be.true;
 	});
 
 	it('returns the priority', function () {

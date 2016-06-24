@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import cache from '../lib/cache';
+import * as cache from '../lib/cache';
 import * as aws from '../lib/aws';
 
 describe('aws', function () {

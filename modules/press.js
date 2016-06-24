@@ -1,17 +1,17 @@
 import {getPressKey} from '../lib/aws-keys';
 import {toListOfVersions} from '../lib/aws-transforms';
 
-export default function (tool, aws) {
+export default function (client) {
     function getLastModified (front, location) {
-        const options = tool.options;
+        const options = client.options;
 
         return new Promise(function (resolve, reject) {
-            aws.headObject({
+            client.AWS.headObject({
                 Bucket: options.bucket,
                 Key: getPressKey(front, location, options)
             }, function (err, object) {
                 if (!err) {
-                    resolve(object.LastModified);
+                    resolve(new Date(object.LastModified));
                 } else if (err && err.statusCode === 404) {
                     resolve(null);
                 } else {
@@ -22,10 +22,10 @@ export default function (tool, aws) {
     }
 
     function listVersions (front, location) {
-        const options = tool.options;
+        const options = client.options;
 
         return new Promise(function (resolve, reject) {
-            aws.listObjectVersions({
+            client.AWS.listObjectVersions({
                 Bucket: options.bucket,
                 Prefix: getPressKey(front, location, options)
             }, function (err, object) {

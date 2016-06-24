@@ -1,9 +1,9 @@
 import {expect} from 'chai';
-import cache from '../lib/cache';
+import * as cache from '../lib/cache';
 
 describe('cache', function () {
 	it('disabled', function () {
-		cache.cacheEnabled = false;
+		cache.setEnabled(false);
 
 		const instance = cache.key('unit_test/something');
 		instance.store('text');
@@ -11,7 +11,7 @@ describe('cache', function () {
 	});
 
 	it('enabled', function () {
-		cache.cacheEnabled = true;
+		cache.setEnabled(true);
 
 		const instance = cache.key('unit_test/something');
 		instance.store('{"one": 1}');
@@ -19,7 +19,7 @@ describe('cache', function () {
 	});
 
 	it('enabled cache miss', function () {
-		cache.cacheEnabled = true;
+		cache.setEnabled(true);
 
 		const instance = cache.key('unit_test/cache_miss');
 		expect(instance.get()).to.be.undefined;

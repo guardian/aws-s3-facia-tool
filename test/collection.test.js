@@ -1,4 +1,5 @@
 import {expect} from 'chai';
+import moment from 'moment';
 import Collection from '../lib/collection';
 
 describe('collection', function () {
@@ -11,7 +12,7 @@ describe('collection', function () {
 		});
 
 		var idCalled = {};
-		instance.eachArticle(function (container, article) {
+		instance.forEachArticle(function (container, article) {
 			idCalled[container + '__' + article.id] = article;
 		});
 		expect(idCalled).to.deep.equal({
@@ -29,7 +30,7 @@ describe('collection', function () {
 		});
 
 		var idCalled = {};
-		instance.eachArticle(function (container, article) {
+		instance.forEachArticle(function (container, article) {
 			idCalled[container + '__' + article.id] = article;
 		});
 		expect(idCalled).to.deep.equal({
@@ -60,7 +61,7 @@ describe('collection', function () {
 		fronts = instance.fronts();
 		expect(fronts.length).to.equal(1);
 		expect(fronts[0].id).to.equal('one');
-		expect(fronts[0].allCollections()).to.deep.equal(['a', 'b', 'c']);
+		expect(fronts[0].listCollectionsIds()).to.deep.equal(['a', 'b', 'c']);
 
 		instance = new Collection('b', config);
 		fronts = instance.fronts();
@@ -68,7 +69,7 @@ describe('collection', function () {
 		expect(fronts[0].id).to.equal('one');
 		expect(fronts[1].id).to.equal('two');
 		expect(fronts[2].id).to.equal('three');
-		expect(fronts[1].allCollections()).to.deep.equal(['b']);
+		expect(fronts[1].listCollectionsIds()).to.deep.equal(['b']);
 
 		instance = new Collection('e', config);
 		fronts = instance.fronts();
@@ -94,26 +95,26 @@ describe('collection', function () {
 		instance.setContent({
 			lastUpdated: 1433154689097
 		});
-		expect(instance.lastUpdated().isSame('2015-06-01', 'day')).to.be.true;
+		expect(moment(instance.lastUpdated()).isSame('2015-06-01', 'day')).to.be.true;
 	});
 
 	it('know if a collection is backfilled', function () {
-		var config = {
+		const config = {
 			fronts: { one: { collections: ['a', 'b'] } },
 			collections: {
 				a: {},
-				b: { apiQuery: 'something' }
+				b: { backfill: { type: 'capi', query: 'query' } }
 			}
 		};
 
-		var instance = new Collection('a', config);
+		let instance = new Collection('a', config);
 		expect(instance.isBackfilled()).to.equal(false);
 		instance = new Collection('b', config);
 		expect(instance.isBackfilled()).to.equal(true);
 	});
 
 	it('knows if a collection has metadata', function () {
-		var config = {
+		const config = {
 			fronts: { one: { collections: ['notag', 'emptytag', 'onetag', 'twotags'] }},
 			collections: {
 				notag: {},
@@ -123,7 +124,7 @@ describe('collection', function () {
 			}
 		};
 
-		var instance = new Collection('nonexisting', config);
+		let instance = new Collection('nonexisting', config);
 		expect(instance.hasMetadata('lucky')).to.equal(false);
 		instance = new Collection('notag', config);
 		expect(instance.hasMetadata('lucky')).to.equal(false);
