@@ -1,6 +1,6 @@
 import {expect} from 'chai';
 import moment from 'moment';
-import Press from '../modules/press';
+import {Press} from '../tmp/bundle.test.js';
 
 describe('press', function () {
 	const tool = {

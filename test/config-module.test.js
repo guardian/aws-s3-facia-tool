@@ -1,6 +1,5 @@
-const expect = require('chai').expect;
-var Config = require('../modules/config').default;
-var ConfigInstance = require('../lib/config').default;
+import {expect} from 'chai';
+import {Config, ConfigClass} from '../tmp/bundle.test.js';
 
 describe('config module', function () {
 	const tool = {
@@ -59,7 +58,7 @@ describe('config module', function () {
 				}
 			};
 			return expect(Config(tool).fetch())
-			.to.eventually.be.an.instanceof(ConfigInstance);
+			.to.eventually.be.an.instanceof(ConfigClass);
 		});
 	});
 
@@ -129,7 +128,7 @@ describe('config module', function () {
 				}
 			};
 			return expect(Config(tool).fetchAt('AT/precise/location'))
-			.to.eventually.be.an.instanceof(ConfigInstance);
+			.to.eventually.be.an.instanceof(ConfigClass);
 		});
 	});
 });

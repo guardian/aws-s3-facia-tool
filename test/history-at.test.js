@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {History} from '../dist/bundle.es6';
+import {History} from '../tmp/bundle.test.js';
 
 describe('history at', function () {
 	const options = Object.freeze({
@@ -15,6 +15,27 @@ describe('history at', function () {
 			const history = History({options});
 			return expect(history.configAt())
 			.to.eventually.be.rejectedWith(/missing parameter/i);
+		});
+
+		it('fails if the config at a given time cannot be fetched', function () {
+			const history = History({
+				options,
+				AWS: {
+					getObject (ojb, cb) {
+						expect(ojb.Key).to.equal('key-1');
+						cb(new Error('invalid config'));
+					},
+					listObjects (obj, cb) {
+						cb(null, [{
+							Key: 'key-1',
+							LastModified: new Date(2016, 4, 10, 8, 0)
+						}]);
+					}
+				}
+			});
+			const date = new Date(2016, 4, 10, 9, 30);
+			return expect(history.configAt(date))
+			.to.eventually.be.rejectedWith(/invalid config while fetching/i);
 		});
 
 		it('returns the config at that given time', function () {

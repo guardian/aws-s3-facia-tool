@@ -1,7 +1,6 @@
 import {expect} from 'chai';
 import moment from 'moment';
-import Front from '../lib/front';
-import Collection from '../lib/collection';
+import {FrontClass as Front, CollectionClass as Collection} from '../tmp/bundle.test.js';
 
 describe('Front', function () {
 	it('computes the last modified date', function () {

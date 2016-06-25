@@ -1,6 +1,6 @@
 import {expect} from 'chai';
 import moment from 'moment';
-import {Client, History} from '../lib/index';
+import {Client, History} from '../tmp/bundle.test.js';
 
 describe('facia-tool history', function () {
 	let client;

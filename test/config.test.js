@@ -2,7 +2,7 @@ import {expect} from 'chai';
 import _ from 'lodash';
 import json from './samples/config.json';
 import jsonFind from './samples/configFind.json';
-import Config from '../lib/config';
+import {ConfigClass as Config} from '../tmp/bundle.test.js';
 
 describe('config', function () {
 	it('has a collection', function () {

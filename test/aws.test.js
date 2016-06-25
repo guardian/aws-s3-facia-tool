@@ -1,6 +1,6 @@
 import {expect} from 'chai';
 import * as cache from '../lib/cache';
-import defaultAws from '../lib/aws';
+import {s3 as defaultAws} from '../tmp/bundle.test.js';
 
 describe('aws', function () {
 	let aws = defaultAws();

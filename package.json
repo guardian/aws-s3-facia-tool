@@ -5,12 +5,13 @@
   "main": "dist/bundle.js",
   "jsnext:main": "dist/bundle.es6.js",
   "scripts": {
-    "lint": "eslint lib",
-    "pretest": "npm run-script lint",
-    "test": "babel-node --presets es2015 -- ./node_modules/istanbul/lib/cli.js cover node_modules/mocha/bin/_mocha test",
-    "posttest": "istanbul check-coverage --statements 85 --branches 70 --functions 100 --lines 90",
+    "lint": "eslint lib modules test",
+    "bundleTest": "rollup -c rollup.config.test.js",
+    "checkCoverage": "istanbul check-coverage --statements 85 --branches 70 --functions 100 --lines 90",
+    "pretest": "npm run bundleTest",
+    "test": "mocha --reporter test/istanbul.reporter.js test",
+    "posttest": "npm run lint && npm run checkCoverage",
     "prepublish": "npm run bundle && npm test",
-    "watchTests": "babel-node --presets es2015 -- node_modules/mocha/bin/_mocha test -w",
     "bundle": "rollup -c rollup.config.js && rollup -c rollup.config.es6.js"
   },
   "publishConfig": {
@@ -35,6 +36,7 @@
     "rollup": "^0.33.0",
     "rollup-plugin-babel": "^2.6.1",
     "rollup-plugin-commonjs": "^3.0.2",
+    "rollup-plugin-istanbul": "^1.0.0",
     "rollup-plugin-json": "^2.0.1",
     "rollup-plugin-node-resolve": "^1.7.1",
     "sift": "^3.2.1"

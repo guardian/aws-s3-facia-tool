@@ -1,27 +1,37 @@
 import {expect} from 'chai';
-import * as cache from '../lib/cache';
+import path from 'path';
+import {setCacheEnabled, _cacheKey as key, setCacheBasePath} from '../tmp/bundle.test.js';
 
 describe('cache', function () {
 	it('disabled', function () {
-		cache.setEnabled(false);
+		setCacheEnabled(false);
 
-		const instance = cache.key('unit_test/something');
+		const instance = key('unit_test/something');
 		instance.store('text');
 		expect(instance.get()).to.be.undefined;
 	});
 
 	it('enabled', function () {
-		cache.setEnabled(true);
+		setCacheEnabled(true);
 
-		const instance = cache.key('unit_test/something');
+		const instance = key('unit_test/something');
 		instance.store('{"one": 1}');
 		expect(instance.get()).to.deep.equal({ one: 1 });
 	});
 
 	it('enabled cache miss', function () {
-		cache.setEnabled(true);
+		setCacheEnabled(true);
 
-		const instance = cache.key('unit_test/cache_miss');
+		const instance = key('unit_test/cache_miss');
 		expect(instance.get()).to.be.undefined;
+	});
+
+	it('cache path', function () {
+		setCacheEnabled(true);
+		setCacheBasePath(path.join(__dirname, '/../tmp/nested'));
+
+		const instance = key('unit');
+		instance.store('{"one": 1}');
+		expect(instance.get()).to.deep.equal({ one: 1 });
 	});
 });

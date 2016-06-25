@@ -1,6 +1,6 @@
 import {expect} from 'chai';
 import moment from 'moment';
-import List  from '../lib/list-configs';
+import {_ListConfigs as List} from '../tmp/bundle.test.js';
 
 describe('list-configs', function () {
 	it('no time', function () {

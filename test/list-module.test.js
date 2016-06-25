@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import List from '../modules/list';
+import {List} from '../tmp/bundle.test.js';
 
 describe('list module', function () {
 	it('at - returns the default value if list is empty', function () {

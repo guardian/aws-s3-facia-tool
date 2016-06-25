@@ -1,6 +1,6 @@
 import {expect} from 'chai';
 import moment from 'moment';
-import Collection from '../lib/collection';
+import {CollectionClass as Collection} from '../tmp/bundle.test.js';
 
 describe('collection', function () {
 	it('iterates on articles', function () {

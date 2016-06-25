@@ -1,6 +1,5 @@
-const expect = require('chai').expect;
-var Collection = require('../modules/collection').default;
-var CollectionInstance = require('../lib/collection').default;
+import {expect} from 'chai';
+import {Collection, CollectionClass} from '../tmp/bundle.test.js';
 
 describe('collection module', function () {
 	const tool = {
@@ -36,7 +35,7 @@ describe('collection module', function () {
 			};
 			const collection = Collection(tool);
 			return expect(collection.fetch('id'))
-				.to.eventually.be.an.instanceof(CollectionInstance);
+				.to.eventually.be.an.instanceof(CollectionClass);
 		});
 	});
 
@@ -65,7 +64,7 @@ describe('collection module', function () {
 			};
 			const collection = Collection(tool);
 			return expect(collection.fetchAt('id', 'HERE/id'))
-				.to.eventually.be.an.instanceof(CollectionInstance)
+				.to.eventually.be.an.instanceof(CollectionClass)
 				.then(collection => {
 					expect(collection.raw).to.deep.equal({ raw: true });
 				});

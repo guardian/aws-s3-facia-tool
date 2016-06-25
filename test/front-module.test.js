@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {Front, ConfigClass} from '../dist/bundle.es6';
+import {Front, ConfigClass} from '../tmp/bundle.test.js';
 
 describe('Front module', function () {
 	const tool = {

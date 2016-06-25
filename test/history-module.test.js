@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {History, FILTERS} from '../dist/bundle.es6';
+import {History, FILTERS} from '../tmp/bundle.test.js';
 const {strictlyWithin, withinLeading} = FILTERS;
 
 describe('history module', function () {
