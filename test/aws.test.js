@@ -1,5 +1,4 @@
 import {expect} from 'chai';
-import * as cache from '../lib/cache';
 import {s3 as defaultAws} from '../tmp/bundle.test.js';
 
 describe('aws', function () {
@@ -234,7 +233,7 @@ describe('aws', function () {
 		});
 
 		it('get object', function (done) {
-			const instance = cache.key('aws_test/1');
+			const instance = aws._cache.key('aws_test/1');
 			instance.store('{ "any" : true }');
 			aws.setS3({
 				getObject () {
@@ -254,7 +253,7 @@ describe('aws', function () {
 		});
 
 		it('head an object - cache', function (done) {
-			const instance = cache.key('aws_test/2');
+			const instance = aws._cache.key('aws_test/2');
 			instance.store('{ "any" : false }');
 			aws.setS3({
 				headObject () {
@@ -274,7 +273,7 @@ describe('aws', function () {
 		});
 
 		it('list objects - cache', function (done) {
-			const instance = cache.key('aws_test/3');
+			const instance = aws._cache.key('aws_test/3');
 			instance.store(JSON.stringify([{ num: 1}]));
 			aws.setS3({
 				listObjects () {
@@ -294,7 +293,7 @@ describe('aws', function () {
 		});
 
 		it('list object versions - cache', function (done) {
-			const instance = cache.key('aws_test/4');
+			const instance = aws._cache.key('aws_test/4');
 			instance.store(JSON.stringify([{ num: 2 }]));
 			aws.setS3({
 				listObjectVersions () {
