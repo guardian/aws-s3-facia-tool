@@ -1,19 +1,18 @@
 import {expect} from 'chai';
-import Config from '../modules/config';
-import ConfigInstance from '../lib/config';
+import {Config, ConfigClass} from '../tmp/bundle.test.js';
 
 describe('config module', function () {
-	const tool = Object.freeze({
-		options: {
+	const tool = {
+		options: Object.freeze({
 			bucket: 'test',
 			env: 'TEST',
 			configKey: 'config'
-		}
-	});
+		})
+	};
 
 	describe('head', function () {
 		it('rejects if aws returns errors', function () {
-			return expect(Config(tool, {
+			tool.AWS = {
 				headObject: (obj, cb) => {
 					expect(obj).to.deep.equal({
 						Bucket: 'test',
@@ -21,23 +20,25 @@ describe('config module', function () {
 					});
 					cb(new Error('aws error'));
 				}
-			}).head())
+			};
+			return expect(Config(tool).head())
 			.to.eventually.be.rejectedWith(Error, 'aws error');
 		});
 
 		it('resolves if aws is fine', function () {
-			return expect(Config(tool, {
+			tool.AWS = {
 				headObject: (obj, cb) => {
 					cb(null);
 				}
-			}).head())
+			};
+			return expect(Config(tool).head())
 			.to.eventually.be.fulfilled;
 		});
 	});
 
 	describe('fetch', function () {
 		it('rejects if aws returns errors', function () {
-			return expect(Config(tool, {
+			tool.AWS = {
 				getObject: (obj, cb) => {
 					expect(obj).to.deep.equal({
 						Bucket: 'test',
@@ -45,40 +46,44 @@ describe('config module', function () {
 					});
 					cb(new Error('aws error'));
 				}
-			}).fetch())
+			};
+			return expect(Config(tool).fetch())
 			.to.eventually.be.rejectedWith(Error, 'aws error');
 		});
 
 		it('resolves if aws is fine', function () {
-			return expect(Config(tool, {
+			tool.AWS = {
 				getObject: (obj, cb) => {
 					cb(null, { result: 'aws' });
 				}
-			}).fetch())
-			.to.eventually.be.an.instanceof(ConfigInstance);
+			};
+			return expect(Config(tool).fetch())
+			.to.eventually.be.an.instanceof(ConfigClass);
 		});
 	});
 
 	describe('get', function () {
 		it('access the network if config is not cached', function () {
 			let callCount = 0;
-			return expect(Config(tool, {
+			tool.AWS = {
 				getObject: (obj, cb) => {
 					callCount += 1;
 					cb(null, {});
 				}
-			}).get().then(() => callCount))
+			};
+			return expect(Config(tool).get().then(() => callCount))
 			.to.eventually.equal(1);
 		});
 
 		it('uses the cache if config is available', function () {
 			let callCount = 0;
-			const config = Config(tool, {
+			tool.AWS = {
 				getObject: (obj, cb) => {
 					callCount += 1;
 					cb(null, {});
 				}
-			});
+			};
+			const config = Config(tool);
 
 			return expect(
 				config.get()
@@ -91,18 +96,19 @@ describe('config module', function () {
 
 	describe('json', function () {
 		it('returns the config as JSON', function () {
-			return expect(Config(tool, {
+			tool.AWS = {
 				getObject: (obj, cb) => {
 					cb(null, { json: true });
 				}
-			}).json())
+			};
+			return expect(Config(tool).json())
 			.to.eventually.deep.equal({ json: true });
 		});
 	});
 
 	describe('fetchAt', function () {
 		it('rejects if aws returns errors', function () {
-			return expect(Config(tool, {
+			tool.AWS = {
 				getObject: (obj, cb) => {
 					expect(obj).to.deep.equal({
 						Bucket: 'test',
@@ -110,17 +116,19 @@ describe('config module', function () {
 					});
 					cb(new Error('aws error'));
 				}
-			}).fetchAt('AT/precise/location'))
+			};
+			return expect(Config(tool).fetchAt('AT/precise/location'))
 			.to.eventually.be.rejectedWith(Error, 'aws error');
 		});
 
 		it('resolves if aws is fine', function () {
-			return expect(Config(tool, {
+			tool.AWS = {
 				getObject: (obj, cb) => {
 					cb(null, { result: 'aws' });
 				}
-			}).fetchAt('AT/precise/location'))
-			.to.eventually.be.an.instanceof(ConfigInstance);
+			};
+			return expect(Config(tool).fetchAt('AT/precise/location'))
+			.to.eventually.be.an.instanceof(ConfigClass);
 		});
 	});
 });

@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import promise from '../lib/as-promise';
+import {_promise as promise} from '../tmp/bundle.test.js';
 
 describe('as promise', function () {
 

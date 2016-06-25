@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import find from '../lib/find-history';
+import {_findInHistory as find} from '../tmp/bundle.test.js';
 
 describe('find history', function () {
     const now = new Date(2016, 3, 1, 12, 0);

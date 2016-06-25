@@ -3,6 +3,8 @@ import {datesBetween} from '../lib/since';
 import {getHistoryConfigPrefix, getHistoryCollectionPrefix} from '../lib/aws-keys';
 import {toListOfConfigChanges, toListOfCollectionChanges} from '../lib/aws-transforms';
 import findInHistory from '../lib/find-history';
+import {default as ToolConfig} from './config';
+import {default as ToolCollection} from './collection';
 
 // To be deprecated maybe?
 import * as sinceUtil from '../lib/since';
@@ -11,21 +13,22 @@ import Config from '../lib/config';
 import Collection from '../lib/collection';
 import ListCollections from '../lib/list-collection-history';
 
-export default function (tool, aws) {
+export default function (client) {
     function configList (since, to, filter) {
         if (!since || !to) {
             return Promise.reject(
                 new Error('Missing or invalid date interval parameters in history.configList')
             );
         } else {
-            const maxParallel = tool.options.maxParallelRequests || 4;
-            const maxDaysHistory = tool.options.maxDaysHistory || 7;
+            const options = client.options;
+            const maxParallel = options.maxParallelRequests || 4;
+            const maxDaysHistory = options.maxDaysHistory || 7;
             const needed = datesBetween(since, to, maxDaysHistory);
 
             return parallel(needed, (date, callback) => {
-                aws.listObjects({
-                    Bucket: tool.options.bucket,
-                    Prefix: getHistoryConfigPrefix(date, tool.options)
+                client.AWS.listObjects({
+                    Bucket: options.bucket,
+                    Prefix: getHistoryConfigPrefix(date, options)
                 }, (err, data) => callback(err, err ? null : toListOfConfigChanges(data)));
             }, maxParallel)
             .then(filter ? filter : list => list);
@@ -42,14 +45,15 @@ export default function (tool, aws) {
                 new Error('Missing collection ID in history.collectionList')
             );
         } else {
-            const maxParallel = tool.options.maxParallelRequests || 4;
-            const maxDaysHistory = tool.options.maxDaysHistory || 7;
+            const options = client.options;
+            const maxParallel = options.maxParallelRequests || 4;
+            const maxDaysHistory = options.maxDaysHistory || 7;
             const needed = datesBetween(since, to, maxDaysHistory);
 
             return parallel(needed, (date, callback) => {
-                aws.listObjects({
-                    Bucket: tool.options.bucket,
-                    Prefix: getHistoryCollectionPrefix(collectionId, date, tool.options)
+                client.AWS.listObjects({
+                    Bucket: options.bucket,
+                    Prefix: getHistoryCollectionPrefix(collectionId, date, options)
                 }, (err, data) => callback(err, err ? null : toListOfCollectionChanges(data)));
             }, maxParallel)
             .then(filter ? filter : list => list);
@@ -62,8 +66,8 @@ export default function (tool, aws) {
                 new Error('Missing parameter \'time\' in history.configAt')
             );
         } else {
-            return findInHistory(time, getHistoryConfigPrefix, tool.options, aws)
-            .then(object => tool.config.fetchAt(object.Key))
+            return findInHistory(time, getHistoryConfigPrefix, client.options, client.AWS)
+            .then(object => ToolConfig(client).fetchAt(object.Key))
             .catch(ex => {
                 ex.message += ' while fetching the config';
                 return Promise.reject(ex);
@@ -82,8 +86,8 @@ export default function (tool, aws) {
             );
         } else {
             const prefix = (date, options) => getHistoryCollectionPrefix(id, date, options);
-            return findInHistory(time, prefix, tool.options, aws)
-            .then(object => tool.collection.fetchAt(id, object.Key, config))
+            return findInHistory(time, prefix, client.options, client.AWS)
+            .then(object => ToolCollection(client).fetchAt(id, object.Key, config))
             .catch(ex => {
                 ex.message += ' while fetching the collection \'' + id + '\'';
                 return Promise.reject(ex);
@@ -101,12 +105,12 @@ export default function (tool, aws) {
                 new Error('Missing parameter \'time\' in history.frontAt')
             );
         } else {
-            return tool.history.configAt(time).then(config => {
+            return configAt(time).then(config => {
                 if (config.hasFront(id)) {
                     const front = config.front(id);
-                    const maxParallel = tool.options.maxParallelRequests || 4;
-                    return parallel(front.allCollections(), (collectionId, callback) => {
-                        tool.history.collectionAt(collectionId, time, config)
+                    const maxParallel = client.options.maxParallelRequests || 4;
+                    return parallel(front.listCollectionsIds(), (collectionId, callback) => {
+                        collectionAt(collectionId, time, config)
                         .then(collection => {
                             front.setCollection(collectionId, collection);
                             callback(null);
@@ -126,14 +130,14 @@ export default function (tool, aws) {
 
     function config (since) {
         console.warn('History.config is deprecated');
-        var options = tool.options,
+        var options = client.options,
             maxParallel = options.maxParallelRequests || 4,
             needed = sinceUtil.needed(since, options.maxDaysHistory),
             configList;
 
         return parallel(needed, function (date, callback) {
             var configPrefix = getHistoryConfigPrefix(date, options);
-            aws.listObjects({
+            client.AWS.listObjects({
                 Bucket: options.bucket,
                 Prefix: configPrefix
             }, callback);
@@ -148,7 +152,7 @@ export default function (tool, aws) {
         })
         .then(function (list) {
             return parallel(list.all, function (object, callback) {
-                aws.getObject({
+                client.AWS.getObject({
                     Bucket: options.bucket,
                     Key: object.Key
                 }, callback);
@@ -167,14 +171,14 @@ export default function (tool, aws) {
         if (!id) {
             return Promise.reject(new Error('Missing collection id while fetching history'));
         }
-        var options = tool.options,
+        var options = client.options,
             maxParallel = options.maxParallelRequests || 4,
             needed = sinceUtil.needed(since, options.maxDaysHistory),
             collectionList;
 
         return parallel(needed, function (date, callback) {
             var collectionPrefix = getHistoryCollectionPrefix(id, date, options);
-            aws.listObjects({
+            client.AWS.listObjects({
                 Bucket: options.bucket,
                 Prefix: collectionPrefix
             }, callback);
@@ -189,7 +193,7 @@ export default function (tool, aws) {
         })
         .then(function (list) {
             return parallel(list.all, function (object, callback) {
-                aws.getObject({
+                client.AWS.getObject({
                     Bucket: options.bucket,
                     Key: object.Key
                 }, callback);

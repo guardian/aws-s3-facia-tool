@@ -5,12 +5,14 @@ import babel from 'rollup-plugin-babel';
 
 export default {
 	entry: 'lib/index.js',
-	format: 'cjs',
-	dest: 'dist/bundle.js',
+	format: 'es',
+	dest: 'dist/bundle.es6.js',
 	external: ['aws-sdk'],
 	plugins: [
 		json(),
-		babel(),
+		babel({
+			include: 'node_modules/async-es/**/*.js'
+		}),
 		nodeResolve({ jsnext: true }),
 		commonjs()
 	]

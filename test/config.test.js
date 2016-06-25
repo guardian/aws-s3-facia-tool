@@ -2,7 +2,7 @@ import {expect} from 'chai';
 import _ from 'lodash';
 import json from './samples/config.json';
 import jsonFind from './samples/configFind.json';
-import Config from '../lib/config';
+import {ConfigClass as Config} from '../tmp/bundle.test.js';
 
 describe('config', function () {
 	it('has a collection', function () {
@@ -114,5 +114,21 @@ describe('config', function () {
 		});
 		expect(config.listFrontsIds()).to.deep.equal(['afront', 'bfront']);
 		expect(config.listCollectionsIds()).to.deep.equal(['collection']);
+	});
+
+	it('lists ids by priority', function () {
+		var config = new Config({
+			fronts: {
+				edit: {},
+				banana1: { priority: 'banana' },
+				banana2: { priority: 'banana' }
+			},
+			collections: {
+				collection: {}
+			}
+		});
+		expect(config.listFrontsIds()).to.deep.equal(['edit', 'banana1', 'banana2']);
+		expect(config.listFrontsIds('editorial')).to.deep.equal(['edit']);
+		expect(config.listFrontsIds('banana')).to.deep.equal(['banana1', 'banana2']);
 	});
 });

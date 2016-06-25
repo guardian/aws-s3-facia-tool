@@ -1,70 +1,120 @@
 import {expect} from 'chai';
-import Collection from '../modules/collection';
-import CollectionInstance from '../lib/collection';
+import {Collection, CollectionClass} from '../tmp/bundle.test.js';
 
 describe('collection module', function () {
-	const tool = Object.freeze({
-		options: {
+	const tool = {
+		options: Object.freeze({
 			bucket: 'test',
 			env: 'TEST',
 			collectionsPrefix: 'collection'
-		}
-	});
+		})
+	};
 
 	describe('fetch', function () {
 		it('rejects if aws returns errors', function () {
-            const collection = Collection(tool, {
-                getObject (obj, cb) {
-                    expect(obj).to.deep.equal({
-                        Bucket: 'test',
-                        Key: 'TEST/collection/id/collection.json'
-                    });
-                    cb(new Error('aws error'));
-                }
-            });
+			tool.AWS = {
+				getObject (obj, cb) {
+					expect(obj).to.deep.equal({
+						Bucket: 'test',
+						Key: 'TEST/collection/id/collection.json'
+					});
+					cb(new Error('aws error'));
+				}
+			};
+			const collection = Collection(tool);
 
 			return expect(collection.fetch('id'))
-                .to.eventually.be.rejectedWith(Error, 'aws error');
+				.to.eventually.be.rejectedWith(Error, 'aws error');
 		});
 
 		it('resolves if aws is fine', function () {
-            const collection = Collection(tool, {
-                getObject (obj, cb) {
-                    cb(null, {});
-                }
-            });
+			tool.AWS = {
+				getObject (obj, cb) {
+					cb(null, {});
+				}
+			};
+			const collection = Collection(tool);
 			return expect(collection.fetch('id'))
-                .to.eventually.be.an.instanceof(CollectionInstance);
+				.to.eventually.be.an.instanceof(CollectionClass);
 		});
 	});
 
 	describe('fetchAt', function () {
 		it('rejects if aws returns errors', function () {
-            const collection = Collection(tool, {
-                getObject (obj, cb) {
-                    expect(obj).to.deep.equal({
-                        Bucket: 'test',
-                        Key: 'HERE/id'
-                    });
-                    cb(new Error('aws error'));
-                }
-            });
+			tool.AWS = {
+				getObject (obj, cb) {
+					expect(obj).to.deep.equal({
+						Bucket: 'test',
+						Key: 'HERE/id'
+					});
+					cb(new Error('aws error'));
+				}
+			};
+			const collection = Collection(tool);
 
 			return expect(collection.fetchAt('id', 'HERE/id'))
-                .to.eventually.be.rejectedWith(Error, 'aws error');
+				.to.eventually.be.rejectedWith(Error, 'aws error');
 		});
 
 		it('resolves if aws is fine', function () {
-            const collection = Collection(tool, {
-                getObject (obj, cb) {
-                    cb(null, { raw: true });
-                }
-            });
+			tool.AWS = {
+				getObject (obj, cb) {
+					cb(null, { raw: true });
+				}
+			};
+			const collection = Collection(tool);
 			return expect(collection.fetchAt('id', 'HERE/id'))
-                .to.eventually.be.an.instanceof(CollectionInstance)
+				.to.eventually.be.an.instanceof(CollectionClass)
 				.then(collection => {
 					expect(collection.raw).to.deep.equal({ raw: true });
 				});
+		});
+	});
+
+	describe('list', function () {
+		it('rejects if aws returns errors', function () {
+			tool.AWS = {
+				listObjects (obj, cb) {
+					expect(obj).to.deep.equal({
+						Bucket: 'test',
+						Prefix: 'TEST/collection'
+					});
+					cb(new Error('aws error'));
+				}
+			};
+			const collection = Collection(tool);
+
+			return expect(collection.list())
+				.to.eventually.be.rejectedWith(Error, 'aws error');
+		});
+
+		it('resolves if aws is fine', function () {
+			tool.AWS = {
+				listObjects (obj, cb) {
+					cb(null, [{
+						Key: 'TEST/collection/abcd/collection.json',
+						LastModified: new Date(2016, 4, 1),
+						ETag: '123'
+					}, {
+						Key: 'TEST/collection/one/two/three/collection.json',
+						LastModified: new Date(2016, 4, 2),
+						ETag: '234'
+					}]);
+				}
+			};
+			const collection = Collection(tool);
+			return expect(collection.list())
+				.to.eventually.deep.equal([{
+					key: 'TEST/collection/abcd/collection.json',
+					lastModified: new Date(2016, 4, 1),
+					etag: '123',
+					collectionId: 'abcd'
+				}, {
+					key: 'TEST/collection/one/two/three/collection.json',
+					lastModified: new Date(2016, 4, 2),
+					etag: '234',
+					collectionId: 'one/two/three'
+				}]);
 		});
 	});
 });

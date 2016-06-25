@@ -2,13 +2,13 @@ import {configKey} from '../lib/aws-keys';
 import Config from '../lib/config';
 import promise from '../lib/as-promise';
 
-export default function (tool, aws) {
+export default function (client) {
     let cachedConfig;
 
     function fetch () {
-        const options = tool.options;
+        const options = client.options;
         return promise((cb) => {
-            aws.getObject({
+            client.AWS.getObject({
                 Bucket: options.bucket,
                 Key: configKey(options)
             }, cb);
@@ -19,9 +19,9 @@ export default function (tool, aws) {
     }
 
     function head () {
-        const options = tool.options;
+        const options = client.options;
         return promise((cb) => {
-            aws.headObject({
+            client.AWS.headObject({
                 Bucket: options.bucket,
                 Key: configKey(options)
             }, cb);
@@ -41,9 +41,9 @@ export default function (tool, aws) {
     }
 
     function fetchAt (key) {
-        const options = tool.options;
+        const options = client.options;
         return promise((cb) => {
-            aws.getObject({
+            client.AWS.getObject({
                 Bucket: options.bucket,
                 Key: key
             }, cb);
