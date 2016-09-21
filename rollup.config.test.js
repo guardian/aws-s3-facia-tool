@@ -11,11 +11,13 @@ export default {
 	external: ['aws-sdk'],
 	plugins: [
 		json(),
-		babel({
-			include: 'node_modules/async-es/**/*.js'
-		}),
+		babel(),
 		istanbul({
-			exclude: ['test/*.js', 'node_modules/**/*']
+			exclude: ['test/*.js', 'node_modules/**/*'],
+			instrumenterConfig: {
+				esModules: true,
+				noCompact: true
+			}
 		}),
 		nodeResolve({ jsnext: true }),
 		commonjs()
