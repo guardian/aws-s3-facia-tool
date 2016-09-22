@@ -13,7 +13,11 @@ export default {
 		json(),
 		babel(),
 		istanbul({
-			exclude: ['test/*.js', 'node_modules/**/*'],
+			exclude: [
+				'test/*.js',
+				'node_modules/**/*',
+				'**/visible-stories.js'
+			],
 			instrumenterConfig: {
 				esModules: true,
 				noCompact: true

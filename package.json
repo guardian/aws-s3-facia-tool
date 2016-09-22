@@ -5,10 +5,11 @@
   "main": "dist/bundle.js",
   "jsnext:main": "dist/bundle.es6.js",
   "scripts": {
+    "clean": "rm -rf coverage tmp dist",
     "lint": "eslint lib modules test",
     "bundleTest": "rollup -c rollup.config.test.js",
-    "checkCoverage": "istanbul check-coverage --statements 85 --branches 70 --functions 100 --lines 90",
-    "pretest": "npm run bundleTest",
+    "checkCoverage": "istanbul check-coverage --statements 85 --branches 70 --functions 95 --lines 90",
+    "pretest": "npm run clean && npm run bundleTest",
     "test": "mocha --reporter test/istanbul.reporter.js test",
     "posttest": "npm run lint && npm run checkCoverage",
     "prepublish": "npm run bundle && npm test",
