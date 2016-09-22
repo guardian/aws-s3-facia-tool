@@ -1,7 +1,7 @@
 {
   "name": "aws-s3-facia-tool",
   "description": "API on top of facia tool storage",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "main": "dist/bundle.js",
   "jsnext:main": "dist/bundle.es6.js",
   "scripts": {
