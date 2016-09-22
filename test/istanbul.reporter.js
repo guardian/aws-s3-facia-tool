@@ -1,10 +1,10 @@
-const instanbul = require('istanbul');
+const istanbul = require('istanbul');
 const MochaSpecReporter = require('mocha/lib/reporters/spec');
 
 module.exports = function (runner) {
-	const collector = new instanbul.Collector();
-	const reporter = new instanbul.Reporter();
-	reporter.addAll([ 'lcov', 'json' ]);
+	const collector = new istanbul.Collector();
+	const reporter = new istanbul.Reporter();
+	reporter.addAll([ 'json', 'lcov' ]);
 	new MochaSpecReporter(runner);
 
 	runner.on('end', function () {

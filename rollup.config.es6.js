@@ -10,9 +10,7 @@ export default {
 	external: ['aws-sdk'],
 	plugins: [
 		json(),
-		babel({
-			include: 'node_modules/async-es/**/*.js'
-		}),
+		babel(),
 		nodeResolve({ jsnext: true }),
 		commonjs()
 	]
